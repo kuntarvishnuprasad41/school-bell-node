@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.3",
+    "node-aplay": "^1.0.3",
+    "play-sound": "^1.1.6",
+    "sound-play": "^1.1.0"
+  }
+}
