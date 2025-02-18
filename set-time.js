@@ -3,9 +3,14 @@ const bodyParser = require('body-parser');
 const { exec } = require('child_process');
 const app = express();
 const port = 3500;
+const cors = require('cors');  // Add this line
+
 
 let customTime = new Date(); // Initial system time is set to the current date and time.
 
+app.use(bodyParser.json());
+
+app.use(cors()); // Enable CORS for all routes
 app.use(bodyParser.json());
 
 // Endpoint to get the current system time
