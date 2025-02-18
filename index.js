@@ -230,6 +230,13 @@ app.put('/schedule/:id', (req, res) => {
     );
 });
 
+let customTime = new Date(); // Initial system time is set to the current date and time.
+
+app.get('/current-time', (req, res) => {
+    // Get the custom system time or the actual system time if it's not set
+    res.json({ currentTime: customTime });
+});
+
 
 app.post('/set-system-time', (req, res) => {
     const { newTime } = req.body;
