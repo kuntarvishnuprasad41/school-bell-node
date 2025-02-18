@@ -6,7 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const cors = require('cors');
 const cron = require('node-cron');
-const player = require('play-sound')(opts = {});
+const player = require('play-sound')({ player: 'mpg123' });
 
 const app = express();
 const PORT = 3000;
@@ -55,13 +55,20 @@ function playSound(soundPath) {
     const fullPath = path.join(__dirname, 'public', soundPath);
     console.log(`Playing sound: ${fullPath}`);
 
-    // First try with play-sound
     player.play(fullPath, (err) => {
         if (err) {
             console.error('Error playing sound with play-sound:', err);
+            console.error('play-sound error code:', err.code);  // Log the error code
+            console.error('play-sound error signal:', err.signal); // Log the signal
+
             // Fallback to ffplay
-            exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error) => {
-                if (error) console.error('Error playing with ffplay:', error);
+            exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
+                if (error) {
+                    console.error('Error playing with ffplay:', error);
+                    if (stderr) console.error('ffplay stderr:', stderr);
+                } else {
+                    console.log('ffplay output:', stdout);
+                }
             });
         }
     });
