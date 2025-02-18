@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "nodemon": "^3.1.9",
     "path": "^0.12.7",
     "play-sound": "^1.1.6",
+    "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   }
 }
