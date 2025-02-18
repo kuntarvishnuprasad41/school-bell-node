@@ -194,8 +194,8 @@
                     const localDate = new Date(newTime);
 
                     // IST is UTC+5:30, so we add 5.5 hours (5.5 * 60 minutes)
-                    const offsetIST = 5.5 * 60; // IST offset in minutes
-                    const adjustedDate = new Date(localDate.getTime() + offsetIST * 60000);
+                    // const offsetIST = 5.5 * 60; // IST offset in minutes
+                    // const adjustedDate = new Date(localDate.getTime() + offsetIST * 60000);
 
                     // Format it back to ISO 8601 format
                     const isoStringIST = adjustedDate.toISOString(); // This will be in UTC with 'Z'
