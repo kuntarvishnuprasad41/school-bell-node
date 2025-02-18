@@ -9,6 +9,20 @@
             body {
                 font-family: Arial, sans-serif;
                 padding: 20px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            .sound-library {
+                border: 1px solid #ccc;
+                padding: 20px;
+                margin-bottom: 20px;
             }
 
             table {
@@ -19,7 +33,7 @@
 
             th,
             td {
-                border: 1px solid black;
+                border: 1px solid #ddd;
                 padding: 10px;
                 text-align: left;
             }
@@ -27,22 +41,118 @@
             th {
                 background-color: #f4f4f4;
             }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .edit-form {
+                display: none;
+                margin-top: 20px;
+                padding: 20px;
+                border: 1px solid #ccc;
+                background-color: #f9f9f9;
+            }
+
+            .edit-form.active {
+                display: block;
+            }
+
+            button {
+                padding: 5px 10px;
+                margin-right: 5px;
+                cursor: pointer;
+            }
+
+            .sound-select {
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .test-sound {
+                margin-left: 10px;
+                padding: 2px 5px;
+                font-size: 0.8em;
+            }
         </style>
     </head>
 
     <body>
         <h2>School Bell Scheduler</h2>
-        <label>Time (cron format):</label>
-        <input type="text" id="time" placeholder="* * * * *">
-        <label>Sound File Path:</label>
-        <input type="text" id="sound">
-        <button onclick="addSchedule()">Add Schedule</button>
+
+        <div class="container">
+            <div class="sound-library">
+                <h3>Sound Library</h3>
+                <div class="form-group">
+                    <label>Upload New Sound (MP3):</label>
+                    <input type="file" id="newSound" accept="audio/mp3">
+                    <button onclick="uploadSound()">Upload Sound</button>
+                </div>
+                <div id="soundsList"></div>
+            </div>
+
+            <div class="schedule-form">
+                <h3>Add New Schedule</h3>
+                <div class="form-group">
+                    <label>Day:</label>
+                    <select id="day">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Time (HH:MM):</label>
+                    <input type="time" id="time">
+                </div>
+                <div class="form-group">
+                    <label>Select Sound:</label>
+                    <select id="soundSelect" class="sound-select"></select>
+                    <button onclick="testSound(document.getElementById('soundSelect').value)"
+                        class="test-sound">Test</button>
+                </div>
+                <button onclick="addSchedule()">Add Schedule</button>
+            </div>
+        </div>
+
+        <div id="editForm" class="edit-form">
+            <h3>Edit Schedule</h3>
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label>Day:</label>
+                <select id="editDay">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Time (HH:MM):</label>
+                <input type="time" id="editTime">
+            </div>
+            <div class="form-group">
+                <label>Select Sound:</label>
+                <select id="editSoundSelect" class="sound-select"></select>
+                <button onclick="testSound(document.getElementById('editSoundSelect').value)"
+                    class="test-sound">Test</button>
+            </div>
+            <button onclick="saveEdit()">Save Changes</button>
+            <button onclick="cancelEdit()">Cancel</button>
+        </div>
 
         <h3>Existing Schedules</h3>
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Day</th>
                     <th>Time</th>
                     <th>Sound</th>
                     <th>Actions</th>
@@ -52,6 +162,54 @@
         </table>
 
         <script>
+            async function fetchSounds() {
+                const response = await fetch('/sounds');
+                const sounds = await response.json();
+                updateSoundSelects(sounds);
+                displaySoundsList(sounds);
+            }
+
+            function updateSoundSelects(sounds) {
+                const selects = ['soundSelect', 'editSoundSelect'];
+                selects.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = sounds.map(sound =>
+                        `<option value="${sound.filepath}">${sound.originalname}</option>`
+                    ).join('');
+                });
+            }
+
+            function displaySoundsList(sounds) {
+                const soundsList = document.getElementById('soundsList');
+                soundsList.innerHTML = sounds.map(sound => `
+                <div class="sound-item">
+                    <audio controls>
+                        <source src="${sound.filepath}" type="audio/mp3">
+                    </audio>
+                    <span>${sound.originalname}</span>
+                </div>
+            `).join('');
+            }
+
+            async function uploadSound() {
+                const fileInput = document.getElementById('newSound');
+                if (!fileInput.files.length) {
+                    alert('Please select a sound file.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('sound', fileInput.files[0]);
+
+                await fetch('/upload-sound', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                fileInput.value = '';
+                fetchSounds();
+            }
+
             async function fetchSchedules() {
                 const response = await fetch('/schedules');
                 const schedules = await response.json();
@@ -59,11 +217,18 @@
                 tableBody.innerHTML = '';
                 schedules.forEach(schedule => {
                     const row = `<tr>
-                    <td>${schedule.id}</td>
+                    <td>${schedule.day}</td>
                     <td>${schedule.time}</td>
-                    <td>${schedule.sound}</td>
                     <td>
+                        <audio controls>
+                            <source src="${schedule.sound}" type="audio/mp3">
+                        </audio>
+                        <span>${schedule.originalname || 'Unknown'}</span>
+                    </td>
+                    <td>
+                        <button onclick="editSchedule(${schedule.id}, '${schedule.day}', '${schedule.time}', '${schedule.sound}')">Edit</button>
                         <button onclick="deleteSchedule(${schedule.id})">Delete</button>
+                        <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
                     </td>
                 </tr>`;
                     tableBody.innerHTML += row;
@@ -71,26 +236,93 @@
             }
 
             async function addSchedule() {
+                const day = document.getElementById('day').value;
                 const time = document.getElementById('time').value;
-                const sound = document.getElementById('sound').value;
-                if (!time || !sound) {
-                    alert('Please enter both time and sound file path');
+                const soundPath = document.getElementById('soundSelect').value;
+
+                if (!day || !time || !soundPath) {
+                    alert('Please fill in all fields.');
                     return;
                 }
+
                 await fetch('/schedule', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ time, sound })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ day, time, soundPath })
                 });
+                // Continuing the script section...
+                document.getElementById('time').value = '';
+                fetchSchedules();
+            }
+
+            function editSchedule(id, day, time, sound) {
+                document.getElementById('editForm').classList.add('active');
+                document.getElementById('editId').value = id;
+                document.getElementById('editDay').value = day;
+                document.getElementById('editTime').value = time;
+                document.getElementById('editSoundSelect').value = sound;
+            }
+
+            function cancelEdit() {
+                document.getElementById('editForm').classList.remove('active');
+            }
+
+            async function saveEdit() {
+                const id = document.getElementById('editId').value;
+                const day = document.getElementById('editDay').value;
+                const time = document.getElementById('editTime').value;
+                const soundPath = document.getElementById('editSoundSelect').value;
+
+                if (!day || !time || !soundPath) {
+                    alert('Please fill in all fields.');
+                    return;
+                }
+
+                await fetch(`/schedule/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ day, time, soundPath })
+                });
+
+                cancelEdit();
                 fetchSchedules();
             }
 
             async function deleteSchedule(id) {
-                await fetch(`/schedule/${id}`, { method: 'DELETE' });
-                fetchSchedules();
+                if (confirm('Are you sure you want to delete this schedule?')) {
+                    await fetch(`/schedule/${id}`, { method: 'DELETE' });
+                    fetchSchedules();
+                }
             }
 
-            document.addEventListener('DOMContentLoaded', fetchSchedules);
+            async function testSound(soundPath) {
+                try {
+                    const response = await fetch('/test-sound', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ soundPath })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to play sound');
+                    }
+                } catch (error) {
+                    console.error('Error testing sound:', error);
+                    alert('Failed to play sound. Please check the console for details.');
+                }
+            }
+
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', () => {
+                fetchSounds();
+                fetchSchedules();
+            });
         </script>
     </body>
 
