@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>School Bell Scheduler</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+
+            th,
+            td {
+                border: 1px solid black;
+                padding: 10px;
+                text-align: left;
+            }
+
+            th {
+                background-color: #f4f4f4;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h2>School Bell Scheduler</h2>
+        <label>Time (cron format):</label>
+        <input type="text" id="time" placeholder="* * * * *">
+        <label>Sound File Path:</label>
+        <input type="text" id="sound">
+        <button onclick="addSchedule()">Add Schedule</button>
+
+        <h3>Existing Schedules</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Time</th>
+                    <th>Sound</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleTable"></tbody>
+        </table>
+
+        <script>
+            async function fetchSchedules() {
+                const response = await fetch('/schedules');
+                const schedules = await response.json();
+                const tableBody = document.getElementById('scheduleTable');
+                tableBody.innerHTML = '';
+                schedules.forEach(schedule => {
+                    const row = `<tr>
+                    <td>${schedule.id}</td>
+                    <td>${schedule.time}</td>
+                    <td>${schedule.sound}</td>
+                    <td>
+                        <button onclick="deleteSchedule(${schedule.id})">Delete</button>
+                    </td>
+                </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            async function addSchedule() {
+                const time = document.getElementById('time').value;
+                const sound = document.getElementById('sound').value;
+                if (!time || !sound) {
+                    alert('Please enter both time and sound file path');
+                    return;
+                }
+                await fetch('/schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ time, sound })
+                });
+                fetchSchedules();
+            }
+
+            async function deleteSchedule(id) {
+                await fetch(`/schedule/${id}`, { method: 'DELETE' });
+                fetchSchedules();
+            }
+
+            document.addEventListener('DOMContentLoaded', fetchSchedules);
+        </script>
+    </body>
+
+</html>
