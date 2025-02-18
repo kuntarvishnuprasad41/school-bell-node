@@ -180,7 +180,6 @@
 
         <script>
 
-            const currentUrl = window.location.origin;
 
 
             async function setTime() {
@@ -202,7 +201,7 @@
                     const isoStringIST = adjustedDate.toISOString(); // This will be in UTC with 'Z'
 
                     // Send the adjusted date to the server
-                    const response = await fetch(`${currentUrl}:3500/set-time`, {
+                    const response = await fetch('/set-system-time', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -224,7 +223,7 @@
 
 
             async function fetchCurrentTime() {
-                const response = await fetch(`${currentUrl}:3500/current-time`);
+                const response = await fetch('/current-time');
                 const data = await response.json();
                 document.getElementById('current-time').textContent = new Date(data.currentTime).toLocaleString();
             }
@@ -243,7 +242,7 @@
                 selects.forEach(selectId => {
                     const select = document.getElementById(selectId);
                     select.innerHTML = sounds.map(sound =>
-                        `< option value = "${sound.filepath}" > ${sound.originalname}</option > `
+                        `<option value="${sound.filepath}">${sound.originalname}</option>`
                     ).join('');
                 });
             }
@@ -251,13 +250,13 @@
             function displaySoundsList(sounds) {
                 const soundsList = document.getElementById('soundsList');
                 soundsList.innerHTML = sounds.map(sound => `
-                < div class= "sound-item" >
+                <div class="sound-item">
                     <audio controls>
                         <source src="${sound.filepath}" type="audio/mp3">
                     </audio>
                     <span>${sound.originalname}</span>
-                </div >
-                    `).join('');
+                </div>
+            `).join('');
             }
 
             async function uploadSound() {
@@ -285,7 +284,7 @@
                 const tableBody = document.getElementById('scheduleTable');
                 tableBody.innerHTML = '';
                 schedules.forEach(schedule => {
-                    const row = `< tr >
+                    const row = `<tr>
                     <td>${schedule.day}</td>
                     <td>${schedule.time}</td>
                     <td>
@@ -299,7 +298,7 @@
                         <button onclick="deleteSchedule(${schedule.id})">Delete</button>
                         <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
                     </td>
-                </tr > `;
+                </tr>`;
                     tableBody.innerHTML += row;
                 });
             }
@@ -349,7 +348,7 @@
                     return;
                 }
 
-                await fetch(`/ schedule / ${id} `, {
+                await fetch(`/schedule/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -363,7 +362,7 @@
 
             async function deleteSchedule(id) {
                 if (confirm('Are you sure you want to delete this schedule?')) {
-                    await fetch(`/ schedule / ${id}`, { method: 'DELETE' });
+                    await fetch(`/schedule/${id}`, { method: 'DELETE' });
                     fetchSchedules();
                 }
             }
