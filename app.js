@@ -98,7 +98,7 @@ function playSound(soundPath) {
     console.log(`Playing sound with ffplay: ${fullPath}`);
 
     // Run the ffplay command as the current user (not root)
-    exec(`sudo -E -u kuvi41 mpg13  "${fullPath}"`, (error, stdout, stderr) => {
+    exec(`sudo -E -u kuvi41 mpg123  "${fullPath}"`, (error, stdout, stderr) => {
         if (error) {
             console.error('Error playing with ffplay:', error);
         }
