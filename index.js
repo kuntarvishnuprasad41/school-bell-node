@@ -230,6 +230,35 @@ app.put('/schedule/:id', (req, res) => {
     );
 });
 
+
+app.post('/set-system-time', (req, res) => {
+    const { newTime } = req.body;
+
+    if (!newTime) {
+        return res.status(400).send("New time must be provided.");
+    }
+
+    // Validate time format (ISO string or other formats)
+    const parsedTime = new Date(newTime);
+    if (isNaN(parsedTime)) {
+        return res.status(400).send("Invalid time format.");
+    }
+
+    // Command for Linux/macOS
+    const command = `sudo date --set="${parsedTime.toISOString()}"`;
+
+    // For Windows, use `time` command instead of `date`:
+    // const command = `time ${parsedTime.getHours()}:${parsedTime.getMinutes()}:${parsedTime.getSeconds()}`;
+
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            return res.status(500).send(`Error setting system time: ${stderr || error.message}`);
+        }
+        res.status(200).send(`System time updated to: ${parsedTime}`);
+    });
+});
+
+
 // Test endpoint to trigger sound immediately
 app.post('/test-sound', (req, res) => {
     const { soundPath } = req.body;
