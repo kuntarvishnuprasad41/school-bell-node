@@ -71,8 +71,8 @@ function playSound(soundPath) {
     const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
     console.log(`Playing sound with ffplay: ${fullPath}`);
 
-    // Use ffplay to play the sound
-    exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
+    // Run the ffplay command as the current user (not root)
+    exec(`sudo -u $USER ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
         if (error) {
             console.error('Error playing with ffplay:', error);
         }
