@@ -81,26 +81,19 @@
         <h2>School Bell Scheduler</h2>
 
         <div class="container">
-            <div class="sound-library">
-                <h3>Sound Library</h3>
-                <div class="form-group">
-                    <label>Upload New Sound (MP3):</label>
-                    <input type="file" id="newSound" accept="audio/mp3">
-                    <button onclick="uploadSound()">Upload Sound</button>
-                </div>
-                <div id="soundsList"></div>
-            </div>
+
 
             <div class="schedule-form">
                 <h3>Add New Schedule</h3>
                 <div class="form-group">
                     <label>Day:</label>
                     <select id="day">
+                        <option value="Weekdays">Weekdays (Mon - Thu)</option>
+                        <option value="Friday">Friday</option>
                         <option value="Monday">Monday</option>
                         <option value="Tuesday">Tuesday</option>
                         <option value="Wednesday">Wednesday</option>
                         <option value="Thursday">Thursday</option>
-                        <option value="Friday">Friday</option>
                         <option value="Saturday">Saturday</option>
                         <option value="Sunday">Sunday</option>
                     </select>
@@ -117,6 +110,16 @@
                 </div>
                 <button onclick="addSchedule()">Add Schedule</button>
             </div>
+
+            <div class="sound-library">
+                <h3>Sound Library</h3>
+                <div class="form-group">
+                    <label>Upload New Sound (MP3):</label>
+                    <input type="file" id="newSound" accept="audio/mp3">
+                    <button onclick="uploadSound()">Upload Sound</button>
+                </div>
+                <div id="soundsList"></div>
+            </div>
         </div>
 
         <div id="editForm" class="edit-form">
@@ -125,14 +128,14 @@
             <div class="form-group">
                 <label>Day:</label>
                 <select id="editDay">
+                    <option value="Weekdays">Weekdays (Mon - Thu)</option>
+                    <option value="Friday">Friday</option>
                     <option value="Monday">Monday</option>
                     <option value="Tuesday">Tuesday</option>
                     <option value="Wednesday">Wednesday</option>
                     <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
                     <option value="Saturday">Saturday</option>
                     <option value="Sunday">Sunday</option>
-                </select>
             </div>
             <div class="form-group">
                 <label>Time (HH:MM):</label>
@@ -149,6 +152,12 @@
         </div>
 
         <h3>Existing Schedules</h3>
+        <div class="filter-section">
+            <button id="filterWeekdays">Weekdays</button>
+            <button id="filterToday">Today</button>
+            <button id="filterAll">All</button>
+        </div>
+
         <table>
             <thead>
                 <tr>
@@ -179,6 +188,8 @@
         </div>
 
         <script>
+
+
 
 
             const currentURL = window.location.origin.replace(/:\d+$/, ':3500');
@@ -251,13 +262,38 @@
                 const soundsList = document.getElementById('soundsList');
                 soundsList.innerHTML = sounds.map(sound => `
                 <div class="sound-item">
+                    
                     <audio controls>
                         <source src="${sound.filepath}" type="audio/mp3">
                     </audio>
                     <span>${sound.originalname}</span>
+                     <button onclick="deleteSound('${sound.id}')">Delete</button>
                 </div>
             `).join('');
             }
+
+            async function deleteSound(soundId) {
+                if (!confirm('Are you sure you want to delete this sound?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/delete-sound/${soundId}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) {
+                        alert('Sound deleted successfully!');
+                        fetchSounds(); // Refresh the sound list
+                    } else {
+                        const error = await response.text();
+                        alert(`Failed to delete sound: ${error}`);
+                    }
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                }
+            }
+
 
             async function uploadSound() {
                 const fileInput = document.getElementById('newSound');
@@ -278,30 +314,71 @@
                 fetchSounds();
             }
 
+            // async function fetchSchedules() {
+            //     const response = await fetch('/schedules');
+            //     const schedules = await response.json();
+            //     const tableBody = document.getElementById('scheduleTable');
+            //     tableBody.innerHTML = '';
+            //     schedules.forEach(schedule => {
+            //         const row = `<tr>
+            //         <td>${schedule.day}</td>
+            //         <td>${schedule.time}</td>
+            //         <td>
+            //             <audio controls>
+            //                 <source src="${schedule.sound}" type="audio/mp3">
+            //             </audio>
+            //             <span>${schedule.originalname || 'Unknown'}</span>
+            //         </td>
+            //         <td>
+            //             <button onclick="editSchedule(${schedule.id}, '${schedule.day}', '${schedule.time}', '${schedule.sound}')">Edit</button>
+            //             <button onclick="deleteSchedule(${schedule.id})">Delete</button>
+            //             <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
+            //         </td>
+            //     </tr>`;
+            //         tableBody.innerHTML += row;
+            //     });
+            // }
+
             async function fetchSchedules() {
                 const response = await fetch('/schedules');
                 const schedules = await response.json();
                 const tableBody = document.getElementById('scheduleTable');
                 tableBody.innerHTML = '';
+
+                const dayColors = {
+                    'Monday': 'lightblue',
+                    'Tuesday': 'lightgreen',
+                    'Wednesday': 'lightyellow',
+                    'Thursday': 'lightcoral',
+                    'Friday': 'lightpink',
+                    'Saturday': 'lightseagreen',
+                    'Sunday': 'lightgray',
+                    'Weekdays': 'green'
+                };
+
                 schedules.forEach(schedule => {
-                    const row = `<tr>
-                    <td>${schedule.day}</td>
-                    <td>${schedule.time}</td>
-                    <td>
-                        <audio controls>
-                            <source src="${schedule.sound}" type="audio/mp3">
-                        </audio>
-                        <span>${schedule.originalname || 'Unknown'}</span>
-                    </td>
-                    <td>
-                        <button onclick="editSchedule(${schedule.id}, '${schedule.day}', '${schedule.time}', '${schedule.sound}')">Edit</button>
-                        <button onclick="deleteSchedule(${schedule.id})">Delete</button>
-                        <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
-                    </td>
-                </tr>`;
+                    const row = `<tr style="background-color: ${dayColors[schedule.day] || 'white'};">
+            <td>${schedule.day}</td>
+            <td>${schedule.time}</td>
+            <td>
+                <audio controls>
+                    <source src="${schedule.sound}" type="audio/mp3">
+                </audio>
+                <span>${schedule.originalname || 'Unknown'}</span>
+            </td>
+            <td>
+                <button onclick="editSchedule(${schedule.id}, '${schedule.day}', '${schedule.time}', '${schedule.sound}')">Edit</button>
+                <button onclick="deleteSchedule(${schedule.id})">Delete</button>
+                <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
+            </td>
+        </tr>`;
                     tableBody.innerHTML += row;
                 });
             }
+
+
+
+
 
             async function addSchedule() {
                 const day = document.getElementById('day').value;
@@ -392,6 +469,58 @@
                 fetchSchedules();
                 fetchCurrentTime()
             });
+
+
+            setInterval(() => {
+                fetchCurrentTime();
+            }, 4000);
+
+
+            document.getElementById('filterWeekdays').addEventListener('click', function () {
+                filterSchedules('Weekdays');
+            });
+
+            document.getElementById('filterToday').addEventListener('click', function () {
+                const today = new Date();
+                const todayDay = today.toLocaleString('en-us', { weekday: 'long' });
+                const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+
+                // Check if today is a weekday (Mon-Thu)
+                if (weekdays.includes(todayDay)) {
+                    // Show today and all weekdays' schedules
+                    filterSchedules('Weekdays');
+                } else {
+                    // Show only today's schedule if it's not a weekday (e.g., Friday, Saturday, Sunday)
+                    filterSchedules(todayDay);
+                }
+            });
+
+            document.getElementById('filterAll').addEventListener('click', function () {
+                filterSchedules('All');
+            });
+
+            // Helper function to filter schedules
+            function filterSchedules(day) {
+                const tableBody = document.getElementById('scheduleTable');
+                const rows = tableBody.getElementsByTagName('tr');
+
+                for (let row of rows) {
+                    const rowDay = row.cells[0].textContent; // Assuming the day is in the first column
+                    if (day === 'All') {
+                        row.style.display = '';
+                    } else if (day === 'Weekdays' && ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].includes(rowDay)) {
+                        row.style.display = '';
+                    } else if (day === 'Today' && rowDay === new Date().toLocaleString('en-us', { weekday: 'long' })) {
+                        row.style.display = '';
+                    } else if (rowDay === day) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+
+
         </script>
     </body>
 

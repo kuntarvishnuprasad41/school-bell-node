@@ -6,7 +6,7 @@ const port = 3500;
 const cors = require('cors');  // Add this line
 
 
-let customTime = new Date(); // Initial system time is set to the current date and time.
+// Initial system time is set to the current date and time.
 
 app.use(bodyParser.json());
 
@@ -14,9 +14,10 @@ app.use(cors()); // Enable CORS for all routes
 app.use(bodyParser.json());
 
 // Endpoint to get the current system time
-app.get('/current-time', (req, res) => {
+app.get('/current-time', async (req, res) => {
     // Return the custom system time or the actual system time if it's not set
-    res.json({ currentTime: customTime });
+    let customTime = new Date();
+    res.json({ currentTime: await customTime });
 });
 
 // Endpoint to set the system time
