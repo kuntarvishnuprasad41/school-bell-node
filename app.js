@@ -51,18 +51,35 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Helper function to play sound
+// function playSound(soundPath) {
+//     const fullPath = path.join(__dirname, 'public', soundPath);
+//     console.log(`Playing sound: ${fullPath}`);
+
+//     // First try with play-sound
+//     player.play(fullPath, (err) => {
+//         if (err) {
+//             console.error('Error playing sound with play-sound:', err);
+//             // Fallback to ffplay
+//             exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error) => {
+//                 if (error) console.error('Error playing with ffplay:', error);
+//             });
+//         }
+//     });
+// }
 function playSound(soundPath) {
     const fullPath = path.join(__dirname, 'public', soundPath);
-    console.log(`Playing sound: ${fullPath}`);
+    console.log(`Playing sound with ffplay: ${fullPath}`);
 
-    // First try with play-sound
-    player.play(fullPath, (err) => {
-        if (err) {
-            console.error('Error playing sound with play-sound:', err);
-            // Fallback to ffplay
-            exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error) => {
-                if (error) console.error('Error playing with ffplay:', error);
-            });
+    // Always use ffplay to play the sound
+    exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error('Error playing with ffplay:', error);
+        }
+        if (stderr) {
+            console.error('ffplay error:', stderr);
+        }
+        if (stdout) {
+            console.log('ffplay output:', stdout);
         }
     });
 }
