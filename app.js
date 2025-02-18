@@ -66,11 +66,12 @@ const upload = multer({ storage });
 //         }
 //     });
 // }
+
 function playSound(soundPath) {
-    const fullPath = path.join(__dirname, 'public', soundPath);
+    const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
     console.log(`Playing sound with ffplay: ${fullPath}`);
 
-    // Always use ffplay to play the sound
+    // Use ffplay to play the sound
     exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
         if (error) {
             console.error('Error playing with ffplay:', error);
