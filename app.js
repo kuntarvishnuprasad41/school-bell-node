@@ -72,7 +72,7 @@ function playSound(soundPath) {
     console.log(`Playing sound with ffplay: ${fullPath}`);
 
     // Run the ffplay command as the current user (not root)
-    exec(`sudo -E -u kuvi41 ffplay -nodisp -autoexit ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
+    exec(`sudo -E -u kuvi41 ffplay -nodisp -autoexit  "${fullPath}"`, (error, stdout, stderr) => {
         if (error) {
             console.error('Error playing with ffplay:', error);
         }
