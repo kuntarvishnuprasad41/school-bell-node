@@ -51,39 +51,39 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Helper function to play sound
-// function playSound(soundPath) {
-//     const fullPath = path.join(__dirname, 'public', soundPath);
-//     console.log(`Playing sound: ${fullPath}`);
-
-//     // First try with play-sound
-//     player.play(fullPath, (err) => {
-//         if (err) {
-//             console.error('Error playing sound with play-sound:', err);
-//             // Fallback to ffplay
-//             exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error) => {
-//                 if (error) console.error('Error playing with ffplay:', error);
-//             });
-//         }
-//     });
-// }
-
 function playSound(soundPath) {
-    const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
-    console.log(`Playing sound with ffplay: ${fullPath}`);
+    const fullPath = path.join(__dirname, 'public', soundPath);
+    console.log(`Playing sound: ${fullPath}`);
 
-    // Run the ffplay command as the current user (not root)
-    exec(`sudo -E -u kuvi41 ffplay -nodisp -autoexit  "${fullPath}"`, (error, stdout, stderr) => {
-        if (error) {
-            console.error('Error playing with ffplay:', error);
-        }
-        if (stderr) {
-            console.error('ffplay error:', stderr);
-        }
-        if (stdout) {
-            console.log('ffplay output:', stdout);
+    // First try with play-sound
+    player.play(fullPath, (err) => {
+        if (err) {
+            console.error('Error playing sound with play-sound:', err);
+            // Fallback to ffplay
+            exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error) => {
+                if (error) console.error('Error playing with ffplay:', error);
+            });
         }
     });
 }
+
+// function playSound(soundPath) {
+//     const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
+//     console.log(`Playing sound with ffplay: ${fullPath}`);
+
+//     // Run the ffplay command as the current user (not root)
+//     exec(`sudo -E -u kuvi41 ffplay -nodisp -autoexit  "${fullPath}"`, (error, stdout, stderr) => {
+//         if (error) {
+//             console.error('Error playing with ffplay:', error);
+//         }
+//         if (stderr) {
+//             console.error('ffplay error:', stderr);
+//         }
+//         if (stdout) {
+//             console.log('ffplay output:', stdout);
+//         }
+//     });
+// }
 
 // NEW: Separate function to schedule a single bell
 function scheduleBell(schedule) {
