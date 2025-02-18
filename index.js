@@ -12,6 +12,9 @@ const player = require('play-sound')(opts = {});
 const app = express();
 const PORT = 3000;
 
+// NEW: Added task management
+const cronTasks = new Map();
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
@@ -24,7 +27,6 @@ const db = new sqlite3.Database('schoolbell.db', (err) => {
 
 // Create tables
 db.serialize(() => {
-    // Schedules table
     db.run(`CREATE TABLE IF NOT EXISTS schedules (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         day TEXT NOT NULL,
@@ -32,7 +34,6 @@ db.serialize(() => {
         sound TEXT NOT NULL
     )`);
 
-    // Sounds table to track uploaded sounds
     db.run(`CREATE TABLE IF NOT EXISTS sounds (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         filename TEXT NOT NULL UNIQUE,
@@ -61,10 +62,11 @@ function playSound(soundPath) {
     const fullPath = path.join(__dirname, 'public', soundPath);
     console.log(`Playing sound: ${fullPath}`);
 
+    // First try with play-sound
     player.play(fullPath, (err) => {
         if (err) {
-            console.error('Error playing sound:', err);
-            // Fallback to ffplay if play-sound fails
+            console.error('Error playing sound with play-sound:', err);
+            // Fallback to ffplay
             exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error) => {
                 if (error) console.error('Error playing with ffplay:', error);
             });
@@ -72,33 +74,53 @@ function playSound(soundPath) {
     });
 }
 
-// Function to schedule all bells using node-cron
+// NEW: Separate function to schedule a single bell
+function scheduleBell(schedule) {
+    const [hour, minute] = schedule.time.split(':');
+    const dayMap = {
+        'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+        'Thursday': 4, 'Friday': 5, 'Saturday': 6
+    };
+
+    const cronExpression = `${minute} ${hour} * * ${dayMap[schedule.day]}`;
+    console.log(`Scheduling bell for ${schedule.day} at ${schedule.time} with sound ${schedule.sound}`);
+
+    try {
+        // Stop existing task if it exists
+        if (cronTasks.has(schedule.id)) {
+            cronTasks.get(schedule.id).stop();
+            cronTasks.delete(schedule.id);
+        }
+
+        // Create and store new task
+        const task = cron.schedule(cronExpression, () => {
+            console.log(`Triggering bell for ${schedule.day} at ${schedule.time}`);
+            playSound(schedule.sound);
+        });
+
+        cronTasks.set(schedule.id, task);
+    } catch (error) {
+        console.error(`Error scheduling bell for ID ${schedule.id}:`, error);
+    }
+}
+
+// MODIFIED: Updated scheduleAllBells function
 const scheduleAllBells = () => {
-    // Clear all existing scheduled tasks
-    for (const task of cron.getTasks()) {
+    // Stop all existing tasks
+    for (const [id, task] of cronTasks.entries()) {
         task.stop();
+        cronTasks.delete(id);
     }
 
+    // Schedule all bells from database
     db.all("SELECT * FROM schedules", (err, rows) => {
         if (err) {
             console.error("Error fetching schedules:", err);
             return;
         }
 
-        rows.forEach(row => {
-            const [hour, minute] = row.time.split(':');
-            const dayMap = {
-                'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
-                'Thursday': 4, 'Friday': 5, 'Saturday': 6
-            };
-
-            const cronExpression = `${minute} ${hour} * * ${dayMap[row.day]}`;
-            console.log(`Scheduling bell for ${row.day} at ${row.time} with sound ${row.sound}`);
-
-            cron.schedule(cronExpression, () => {
-                console.log(`Triggering bell for ${row.day} at ${row.time}`);
-                playSound(row.sound);
-            });
+        rows.forEach(schedule => {
+            scheduleBell(schedule);
         });
     });
 };
@@ -132,7 +154,7 @@ app.post('/upload-sound', upload.single('sound'), (req, res) => {
     );
 });
 
-// API to add schedule
+// MODIFIED: Updated schedule creation
 app.post('/schedule', (req, res) => {
     const { day, time, soundPath } = req.body;
 
@@ -141,7 +163,15 @@ app.post('/schedule', (req, res) => {
         [day, time, soundPath],
         function (err) {
             if (err) return res.status(500).send(err.message);
-            scheduleAllBells(); // Reschedule all bells
+
+            // Schedule the new bell immediately
+            scheduleBell({
+                id: this.lastID,
+                day,
+                time,
+                sound: soundPath
+            });
+
             res.status(201).json({
                 id: this.lastID,
                 day,
@@ -160,18 +190,23 @@ app.get('/schedules', (req, res) => {
     });
 });
 
-// API to delete a schedule
+// MODIFIED: Updated schedule deletion
 app.delete('/schedule/:id', (req, res) => {
     const { id } = req.params;
 
+    // Stop and remove the cron task
+    if (cronTasks.has(parseInt(id))) {
+        cronTasks.get(parseInt(id)).stop();
+        cronTasks.delete(parseInt(id));
+    }
+
     db.run("DELETE FROM schedules WHERE id = ?", id, function (err) {
         if (err) return res.status(500).send(err.message);
-        scheduleAllBells(); // Reschedule all bells
         res.status(200).send("Deleted successfully.");
     });
 });
 
-// API to update a schedule
+// MODIFIED: Updated schedule update
 app.put('/schedule/:id', (req, res) => {
     const { id } = req.params;
     const { day, time, soundPath } = req.body;
@@ -181,7 +216,15 @@ app.put('/schedule/:id', (req, res) => {
         [day, time, soundPath, id],
         function (err) {
             if (err) return res.status(500).send(err.message);
-            scheduleAllBells(); // Reschedule all bells
+
+            // Reschedule the updated bell
+            scheduleBell({
+                id: parseInt(id),
+                day,
+                time,
+                sound: soundPath
+            });
+
             res.status(200).send("Updated successfully.");
         }
     );
