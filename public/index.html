@@ -181,7 +181,7 @@
         <script>
 
 
-
+            const currentURL = window.location.origin.replace(/:\d+$/, ':3500');
             async function setTime() {
                 const newTime = document.getElementById('set-time').value;
                 if (!newTime) {
@@ -201,7 +201,7 @@
                     const isoStringIST = adjustedDate.toISOString(); // This will be in UTC with 'Z'
 
                     // Send the adjusted date to the server
-                    const response = await fetch('/set-system-time', {
+                    const response = await fetch(`${currentURL}/set-system-time`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -223,7 +223,7 @@
 
 
             async function fetchCurrentTime() {
-                const response = await fetch('/current-time');
+                const response = await fetch(`${currentURL}/current-time`);
                 const data = await response.json();
                 document.getElementById('current-time').textContent = new Date(data.currentTime).toLocaleString();
             }
