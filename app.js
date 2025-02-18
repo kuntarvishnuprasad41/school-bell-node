@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { exec } = require('child_process');
-const sqlite3 = require('better-sqlite3'); // Use better-sqlite3
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -19,28 +18,23 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Database setup using better-sqlite3
-const db = new sqlite3('schoolbell.db', { verbose: console.log });
+// Paths for JSON files
+const schedulesFilePath = path.join(__dirname, 'schedules.json');
+const soundsFilePath = path.join(__dirname, 'sounds.json');
 
-// Create tables
-db.exec(`
-    CREATE TABLE IF NOT EXISTS schedules (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        day TEXT NOT NULL,
-        time TEXT NOT NULL,
-        sound TEXT NOT NULL
-    );
-`);
+// Read data from JSON files
+const readData = (filePath) => {
+    if (fs.existsSync(filePath)) {
+        const rawData = fs.readFileSync(filePath);
+        return JSON.parse(rawData);
+    }
+    return [];
+};
 
-db.exec(`
-    CREATE TABLE IF NOT EXISTS sounds (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        filename TEXT NOT NULL UNIQUE,
-        originalname TEXT NOT NULL,
-        filepath TEXT NOT NULL,
-        uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-`);
+// Write data to JSON files
+const writeData = (filePath, data) => {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+};
 
 // Ensure uploads folder exists
 const uploadDir = path.join(__dirname, 'public', 'uploads');
@@ -111,17 +105,17 @@ const scheduleAllBells = () => {
         cronTasks.delete(id);
     }
 
-    // Schedule all bells from database
-    const rows = db.prepare("SELECT * FROM schedules").all();
-    rows.forEach(schedule => {
+    // Schedule all bells from the loaded data
+    const schedules = readData(schedulesFilePath);
+    schedules.forEach(schedule => {
         scheduleBell(schedule);
     });
 };
 
 // API to get all available sounds
 app.get('/sounds', (req, res) => {
-    const rows = db.prepare("SELECT * FROM sounds ORDER BY uploaded_at DESC").all();
-    res.json(rows);
+    const sounds = readData(soundsFilePath);
+    res.json(sounds);
 });
 
 // API to upload MP3
@@ -130,83 +124,78 @@ app.post('/upload-sound', upload.single('sound'), (req, res) => {
 
     const soundPath = `/uploads/${req.file.filename}`;
 
-    const stmt = db.prepare("INSERT INTO sounds (filename, originalname, filepath) VALUES (?, ?, ?)");
-    const result = stmt.run(req.file.filename, req.file.originalname, soundPath);
+    const sounds = readData(soundsFilePath);
+    const newSound = { id: Date.now(), filename: req.file.filename, originalname: req.file.originalname, filepath: soundPath };
+    sounds.push(newSound);
+    writeData(soundsFilePath, sounds);
 
-    res.status(201).json({
-        id: result.lastInsertRowid,
-        filename: req.file.filename,
-        originalname: req.file.originalname,
-        filepath: soundPath
-    });
+    res.status(201).json(newSound);
 });
 
 // MODIFIED: Updated schedule creation
 app.post('/schedule', (req, res) => {
     const { day, time, soundPath } = req.body;
-
-    const stmt = db.prepare("INSERT INTO schedules (day, time, sound) VALUES (?, ?, ?)");
-    const result = stmt.run(day, time, soundPath);
+    const schedules = readData(schedulesFilePath);
+    const newSchedule = { id: Date.now(), day, time, sound: soundPath };
+    schedules.push(newSchedule);
+    writeData(schedulesFilePath, schedules);
 
     // Schedule the new bell immediately
-    scheduleBell({
-        id: result.lastInsertRowid,
-        day,
-        time,
-        sound: soundPath
-    });
+    scheduleBell(newSchedule);
 
-    res.status(201).json({
-        id: result.lastInsertRowid,
-        day,
-        time,
-        sound: soundPath
-    });
+    res.status(201).json(newSchedule);
 });
 
 // API to get all schedules
 app.get('/schedules', (req, res) => {
-    const rows = db.prepare(`
-        SELECT schedules.*, sounds.originalname 
-        FROM schedules 
-        LEFT JOIN sounds ON schedules.sound = sounds.filepath
-    `).all();
-    res.json(rows);
+    const schedules = readData(schedulesFilePath);
+    res.json(schedules);
 });
 
 // MODIFIED: Updated schedule deletion
 app.delete('/schedule/:id', (req, res) => {
     const { id } = req.params;
+    const schedules = readData(schedulesFilePath);
 
-    // Stop and remove the cron task
-    if (cronTasks.has(parseInt(id))) {
-        cronTasks.get(parseInt(id)).stop();
-        cronTasks.delete(parseInt(id));
+    // Remove the schedule and stop the cron task
+    const index = schedules.findIndex(schedule => schedule.id === parseInt(id));
+    if (index !== -1) {
+        schedules.splice(index, 1);
+        writeData(schedulesFilePath, schedules);
+
+        // Stop the cron task
+        if (cronTasks.has(parseInt(id))) {
+            cronTasks.get(parseInt(id)).stop();
+            cronTasks.delete(parseInt(id));
+        }
+
+        res.status(200).send("Deleted successfully.");
+    } else {
+        res.status(404).send("Schedule not found.");
     }
-
-    const stmt = db.prepare("DELETE FROM schedules WHERE id = ?");
-    stmt.run(id);
-
-    res.status(200).send("Deleted successfully.");
 });
 
 // MODIFIED: Updated schedule update
 app.put('/schedule/:id', (req, res) => {
     const { id } = req.params;
     const { day, time, soundPath } = req.body;
+    const schedules = readData(schedulesFilePath);
 
-    const stmt = db.prepare("UPDATE schedules SET day = ?, time = ?, sound = ? WHERE id = ?");
-    stmt.run(day, time, soundPath, id);
+    const schedule = schedules.find(s => s.id === parseInt(id));
+    if (schedule) {
+        schedule.day = day;
+        schedule.time = time;
+        schedule.sound = soundPath;
 
-    // Reschedule the updated bell
-    scheduleBell({
-        id: parseInt(id),
-        day,
-        time,
-        sound: soundPath
-    });
+        writeData(schedulesFilePath, schedules);
 
-    res.status(200).send("Updated successfully.");
+        // Reschedule the updated bell
+        scheduleBell(schedule);
+
+        res.status(200).send("Updated successfully.");
+    } else {
+        res.status(404).send("Schedule not found.");
+    }
 });
 
 let customTime = new Date(); // Initial system time is set to the current date and time.
@@ -231,9 +220,6 @@ app.post('/set-system-time', (req, res) => {
 
     // Command for Linux/macOS
     const command = `sudo date --set="${parsedTime.toISOString()}"`;
-
-    // For Windows, use `time` command instead of `date`:
-    // const command = `time ${parsedTime.getHours()}:${parsedTime.getMinutes()}:${parsedTime.getSeconds()}`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
