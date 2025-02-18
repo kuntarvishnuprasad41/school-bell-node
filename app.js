@@ -51,28 +51,28 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Helper function to play sound
-function playSound(soundPath) {
-    const fullPath = path.join(__dirname, 'public', soundPath);
-    console.log(`Playing sound: ${fullPath}`);
+// function playSound(soundPath) {
+//     const fullPath = path.join(__dirname, 'public', soundPath);
+//     console.log(`Playing sound: ${fullPath}`);
 
-    player.play(fullPath, (err) => {
-        if (err) {
-            console.error('Error playing sound with play-sound:', err);
-            console.error('play-sound error code:', err.code);  // Log the error code
-            console.error('play-sound error signal:', err.signal); // Log the signal
+//     player.play(fullPath, (err) => {
+//         if (err) {
+//             console.error('Error playing sound with play-sound:', err);
+//             console.error('play-sound error code:', err.code);  // Log the error code
+//             console.error('play-sound error signal:', err.signal); // Log the signal
 
-            // Fallback to ffplay
-            exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
-                if (error) {
-                    console.error('Error playing with ffplay:', error);
-                    if (stderr) console.error('ffplay stderr:', stderr);
-                } else {
-                    console.log('ffplay output:', stdout);
-                }
-            });
-        }
-    });
-}
+//             // Fallback to ffplay
+//             exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
+//                 if (error) {
+//                     console.error('Error playing with ffplay:', error);
+//                     if (stderr) console.error('ffplay stderr:', stderr);
+//                 } else {
+//                     console.log('ffplay output:', stdout);
+//                 }
+//             });
+//         }
+//     });
+// }
 
 // function playSound(soundPath) {
 //     const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
@@ -91,6 +91,25 @@ function playSound(soundPath) {
 //         }
 //     });
 // }
+
+
+function playSound(soundPath) {
+    const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
+    console.log(`Playing sound with ffplay: ${fullPath}`);
+
+    // Run the ffplay command as the current user (not root)
+    exec(`sudo -E -u kuvi41 mpg13  "${fullPath}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error('Error playing with ffplay:', error);
+        }
+        if (stderr) {
+            console.error('ffplay error:', stderr);
+        }
+        if (stdout) {
+            console.log('ffplay output:', stdout);
+        }
+    });
+}
 
 // NEW: Separate function to schedule a single bell
 function scheduleBell(schedule) {
