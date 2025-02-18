@@ -112,6 +112,38 @@ function playSound(soundPath) {
 }
 
 // NEW: Separate function to schedule a single bell
+// function scheduleBell(schedule) {
+//     const [hour, minute] = schedule.time.split(':');
+//     const dayMap = {
+//         'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+//         'Thursday': 4, 'Friday': 5, 'Saturday': 6
+//     };
+
+//     const cronExpression = `${minute} ${hour} * * ${dayMap[schedule.day]}`;
+//     console.log(`Scheduling bell for ${schedule.day} at ${schedule.time} with sound ${schedule.sound}`);
+
+//     try {
+//         // Stop existing task if it exists
+//         if (cronTasks.has(schedule.id)) {
+//             cronTasks.get(schedule.id).stop();
+//             cronTasks.delete(schedule.id);
+//         }
+
+//         // Create and store new task
+//         const task = cron.schedule(cronExpression, () => {
+//             console.log(`Triggering bell for ${schedule.day} at ${schedule.time}`);
+//             playSound(schedule.sound);
+//         });
+
+//         cronTasks.set(schedule.id, task);
+//     } catch (error) {
+//         console.error(`Error scheduling bell for ID ${schedule.id}:`, error);
+//     }
+// }
+
+
+// const cronTasks = new Map(); // Ensuring cronTasks is initialized
+
 function scheduleBell(schedule) {
     const [hour, minute] = schedule.time.split(':');
     const dayMap = {
@@ -119,7 +151,17 @@ function scheduleBell(schedule) {
         'Thursday': 4, 'Friday': 5, 'Saturday': 6
     };
 
-    const cronExpression = `${minute} ${hour} * * ${dayMap[schedule.day]}`;
+    let cronExpression;
+
+    // Check if the schedule is for weekdays (Monday to Thursday)
+    if (schedule.day === 'Weekdays') {
+        // Cron expression for Monday to Thursday
+        cronExpression = `${minute} ${hour} * * 1-4`; // 1-4 represents Monday to Thursday
+    } else {
+        // Regular single day cron expression
+        cronExpression = `${minute} ${hour} * * ${dayMap[schedule.day]}`;
+    }
+
     console.log(`Scheduling bell for ${schedule.day} at ${schedule.time} with sound ${schedule.sound}`);
 
     try {
@@ -140,6 +182,7 @@ function scheduleBell(schedule) {
         console.error(`Error scheduling bell for ID ${schedule.id}:`, error);
     }
 }
+
 
 // MODIFIED: Updated scheduleAllBells function
 const scheduleAllBells = () => {
@@ -279,6 +322,42 @@ app.post('/test-sound', (req, res) => {
     playSound(soundPath);
     res.status(200).send("Playing sound...");
 });
+
+
+
+// API to delete a sound file
+app.delete('/delete-sound/:id', (req, res) => {
+    const { id } = req.params;
+
+    // Read the current sounds data
+    const sounds = readData(soundsFilePath);
+
+    // Find the sound file by its ID
+    const soundIndex = sounds.findIndex(sound => sound.id === parseInt(id));
+
+    if (soundIndex !== -1) {
+        // Get the sound file details
+        const soundToDelete = sounds[soundIndex];
+
+        // Delete the file from the server
+        const filePath = path.join(__dirname, 'public', soundToDelete.filepath);
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+                return res.status(500).send('Error deleting the file.');
+            }
+
+            // Remove the sound from the JSON file
+            sounds.splice(soundIndex, 1);
+            writeData(soundsFilePath, sounds);
+
+            res.status(200).send('Sound file deleted successfully.');
+        });
+    } else {
+        res.status(404).send('Sound file not found.');
+    }
+});
+
 
 // Schedule all existing bells on server start
 scheduleAllBells();
