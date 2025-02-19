@@ -21,17 +21,29 @@ function sendLog(message) {
 // Scan for Bluetooth device
 app.get("/scan", (req, res) => {
     sendLog("Starting 10-second scan for XKB02...");
+
     scanProcess = spawn("bluetoothctl", ["scan", "on"]);
+    scanProcess.stdout.on("data", data => sendLog(`Scan stdout: ${data.toString()}`));
+    scanProcess.stderr.on("data", data => sendLog(`Scan stderr: ${data.toString()}`));
 
     setTimeout(() => {
+        sendLog("Stopping scan...");
         scanProcess.kill();
         spawn("bluetoothctl", ["scan", "off"]);
 
-        // Get MAC address
+        sendLog("Fetching list of devices...");
         const listDevices = spawn("bluetoothctl", ["devices"]);
         let output = "";
-        listDevices.stdout.on("data", data => output += data.toString());
+
+        listDevices.stdout.on("data", data => {
+            output += data.toString();
+            sendLog(`Devices list stdout: ${data.toString()}`);
+        });
+
+        listDevices.stderr.on("data", data => sendLog(`Devices list stderr: ${data.toString()}`));
+
         listDevices.on("close", () => {
+            sendLog("Parsing device list...");
             const match = output.match(/((?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2})/);
             if (match) {
                 deviceMac = match[1];
@@ -47,15 +59,19 @@ app.get("/scan", (req, res) => {
 
 // Connect to Bluetooth device
 app.get("/connect", (req, res) => {
-    if (!deviceMac) return res.json({ status: "no_device_found" });
+    if (!deviceMac) {
+        sendLog("No device found to connect.");
+        return res.json({ status: "no_device_found" });
+    }
 
-    sendLog(`Connecting to ${deviceMac}...`);
+    sendLog(`Attempting to connect to ${deviceMac}...`);
     connectionProcess = spawn("bluetoothctl", ["connect", deviceMac]);
 
-    connectionProcess.stdout.on("data", data => sendLog(data.toString()));
+    connectionProcess.stdout.on("data", data => sendLog(`Connect stdout: ${data.toString()}`));
+    connectionProcess.stderr.on("data", data => sendLog(`Connect stderr: ${data.toString()}`));
 
-    connectionProcess.on("close", () => {
-        sendLog("Connection process ended.");
+    connectionProcess.on("close", (code) => {
+        sendLog(`Connection process ended with exit code ${code}`);
         res.json({ status: "completed" });
     });
 });
@@ -67,10 +83,12 @@ app.get("/logs", (req, res) => {
     res.setHeader("Connection", "keep-alive");
 
     clients.push(res);
+    sendLog("New client connected for logs.");
 
     req.on("close", () => {
+        sendLog("Client disconnected from logs.");
         clients.splice(clients.indexOf(res), 1);
     });
 });
 
-app.listen(3501, () => console.log("Server running on port 3501"));
+app.listen(3501, () => sendLog("Server running on port 3501"));
