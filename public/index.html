@@ -120,6 +120,14 @@
                 </div>
                 <div id="soundsList"></div>
             </div>
+
+            <div>
+                <h3>Bluetooth Device Control</h3>
+                <button onclick="scanBluetooth()">Scan for Device</button>
+                <button onclick="connectBluetooth()">Connect to Device</button>
+                <p id="bluetooth-status">Status: Not connected</p>
+            </div>
+
         </div>
 
         <div id="editForm" class="edit-form">
@@ -193,6 +201,7 @@
 
 
             const currentURL = window.location.origin.replace(/:\d+$/, ':3500');
+            const currentURL1 = window.location.origin.replace(/:\d+$/, ':3501');
             async function setTime() {
                 const newTime = document.getElementById('set-time').value;
                 if (!newTime) {
@@ -520,6 +529,53 @@
                 }
             }
 
+
+
+            const logContainer = document.getElementById("logContainer");
+
+            // Function to add log messages to UI
+            function addLog(message) {
+                logContainer.innerHTML += `<p>${message}</p>`;
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            // Start scanning for Bluetooth devices
+            function scanBluetooth() {
+                addLog("Scanning for devices...");
+                fetch(`${currentURL1}/scan`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            addLog(`Device found: ${data.mac}`);
+                            document.getElementById("bluetooth-status").innerText = `Device Found: ${data.mac}`;
+                        } else {
+                            addLog("No device found.");
+                        }
+                    })
+                    .catch(error => addLog(`Error: ${error.message}`));
+            }
+
+            // Connect to the found Bluetooth device
+            function connectBluetooth() {
+                addLog("Connecting to device...");
+                fetch(`${currentURL1}/connect`)
+                    .then(response => response.json())
+                    .then(data => {
+                        addLog("Connection attempt completed.");
+                        document.getElementById("bluetooth-status").innerText = "Device Connected!";
+                    })
+                    .catch(error => addLog(`Error: ${error.message}`));
+            }
+
+            // Live logs using Server-Sent Events (SSE)
+            function startLogStream() {
+                const eventSource = new EventSource(`${currentURL1}/logs`);
+                eventSource.onmessage = (event) => addLog(event.data);
+                eventSource.onerror = () => addLog("Lost connection to logs...");
+            }
+
+            // Start listening to logs when the page loads
+            startLogStream();
 
         </script>
     </body>
