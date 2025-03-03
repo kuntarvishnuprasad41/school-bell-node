@@ -236,7 +236,22 @@ app.post('/schedule', (req, res) => {
 // API to get all schedules
 app.get('/schedules', (req, res) => {
     const schedules = readData(schedulesFilePath);
-    res.json(schedules);
+    const sounds = readData(soundsFilePath);
+
+    // Create a map of sounds using the file path as the key
+    const soundMap = sounds.reduce((acc, sound) => {
+        acc[sound.filepath] = sound.originalname; // Use 'filepath' as the key
+        return acc;
+    }, {});
+
+    // Attach filename (filepath) and originalname to each schedule
+    const enrichedSchedules = schedules.map(schedule => ({
+        ...schedule,
+        filename: schedule.sound,  // Assuming `schedule.sound` is the filepath
+        originalname: soundMap[schedule.sound] || 'Unknown',
+    }));
+
+    res.json(enrichedSchedules);
 });
 
 // MODIFIED: Updated schedule deletion
