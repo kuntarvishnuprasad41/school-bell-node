@@ -5,179 +5,89 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>School Bell Scheduler</title>
-        <!DOCTYPE html>
-        <html lang="en">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
 
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>School Bell Scheduler</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        padding: 20px;
-                        max-width: 1200px;
-                        margin: 0 auto;
-                    }
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
 
-                    .system-time {
-                        text-align: center;
-                        margin-bottom: 20px;
-                        padding: 10px;
-                        border-bottom: 2px solid #ddd;
-                        font-size: 1.2em;
-                    }
+            .sound-library {
+                border: 1px solid #ccc;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
 
-                    .schedule-form,
-                    .accordion-item {
-                        border: 1px solid #ddd;
-                        padding: 20px;
-                        margin-bottom: 20px;
-                        border-radius: 8px;
-                    }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
 
-                    .accordion-header {
-                        cursor: pointer;
-                        padding: 10px;
-                        border: 1px solid #ddd;
-                        border-radius: 5px;
-                        background-color: #f9f9f9;
-                    }
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+            }
 
-                    .accordion-content {
-                        display: none;
-                        padding: 10px;
-                    }
+            th {
+                background-color: #f4f4f4;
+            }
 
-                    .accordion-item.active .accordion-content {
-                        display: block;
-                    }
+            .form-group {
+                margin-bottom: 15px;
+            }
 
-                    button {
-                        padding: 5px 10px;
-                        margin-right: 5px;
-                        cursor: pointer;
-                        border: 1px solid #ddd;
-                        border-radius: 5px;
-                        background-color: #f9f9f9;
-                    }
+            .edit-form {
+                display: none;
+                margin-top: 20px;
+                padding: 20px;
+                border: 1px solid #ccc;
+                background-color: #f9f9f9;
+            }
 
-                    button:hover {
-                        background-color: #eee;
-                    }
+            .edit-form.active {
+                display: block;
+            }
 
-                    .modal {
-                        display: none;
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0, 0, 0, 0.5);
-                        justify-content: center;
-                        align-items: center;
-                    }
+            button {
+                padding: 5px 10px;
+                margin-right: 5px;
+                cursor: pointer;
+            }
 
-                    .modal-content {
-                        background-color: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                        max-width: 500px;
-                        width: 90%;
-                    }
+            .sound-select {
+                margin-top: 10px;
+                width: 100%;
+            }
 
-                    .modal.active {
-                        display: flex;
-                    }
-
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 20px;
-                    }
-
-                    th,
-                    td {
-                        border: 1px solid #ddd;
-                        padding: 10px;
-                        text-align: left;
-                    }
-                </style>
-            </head>
+            .test-sound {
+                margin-left: 10px;
+                padding: 2px 5px;
+                font-size: 0.8em;
+            }
+        </style>
+    </head>
 
     <body>
-
-        <div class="system-time">
-            <strong>Current Time:</strong> <span id="current-time"></span>
-        </div>
-
         <h2>School Bell Scheduler</h2>
 
-        <div class="schedule-form">
-            <h3>Add New Schedule</h3>
-            <div class="form-group">
-                <label>Day:</label>
-                <select id="day">
-                    <option value="Weekdays">Weekdays (Mon - Thu)</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Time (HH:MM):</label>
-                <input type="time" id="time">
-            </div>
-            <div class="form-group">
-                <label>Select Sound:</label>
-                <select id="soundSelect" class="sound-select"></select>
-                <button onclick="testSound(document.getElementById('soundSelect').value)"
-                    class="test-sound">Test</button>
-            </div>
-            <button onclick="addSchedule()">Add Schedule</button>
-        </div>
+        <div class="container">
 
-        <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <h3>Sound Library</h3>
-            </div>
-            <div class="accordion-content">
-                <div class="form-group">
-                    <label>Upload New Sound (MP3):</label>
-                    <input type="file" id="newSound" accept="audio/mp3">
-                    <button onclick="uploadSound()">Upload Sound</button>
-                </div>
-                <div id="soundsList"></div>
-            </div>
-        </div>
 
-        <h3>Existing Schedules</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Day</th>
-                    <th>Time</th>
-                    <th>Sound</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="scheduleTable">
-                <!-- Schedules will be populated here -->
-            </tbody>
-        </table>
-
-        <!-- Edit Modal -->
-        <div class="modal" id="editModal">
-            <div class="modal-content">
-                <h3>Edit Schedule</h3>
-                <input type="hidden" id="editId">
+            <div class="schedule-form">
+                <h3>Add New Schedule</h3>
                 <div class="form-group">
                     <label>Day:</label>
-                    <select id="editDay">
+                    <select id="day">
                         <option value="Weekdays">Weekdays (Mon - Thu)</option>
                         <option value="Friday">Friday</option>
                         <option value="Monday">Monday</option>
@@ -190,49 +100,102 @@
                 </div>
                 <div class="form-group">
                     <label>Time (HH:MM):</label>
-                    <input type="time" id="editTime">
+                    <input type="time" id="time">
                 </div>
                 <div class="form-group">
                     <label>Select Sound:</label>
-                    <select id="editSoundSelect" class="sound-select"></select>
-                    <button onclick="testSound(document.getElementById('editSoundSelect').value)"
+                    <select id="soundSelect" class="sound-select"></select>
+                    <button onclick="testSound(document.getElementById('soundSelect').value)"
                         class="test-sound">Test</button>
                 </div>
-                <button onclick="saveEdit()">Save Changes</button>
-                <button onclick="closeModal()">Cancel</button>
+                <button onclick="addSchedule()">Add Schedule</button>
+            </div>
+
+            <div class="sound-library">
+                <h3>Sound Library</h3>
+                <div class="form-group">
+                    <label>Upload New Sound (MP3):</label>
+                    <input type="file" id="newSound" accept="audio/mp3">
+                    <button onclick="uploadSound()">Upload Sound</button>
+                </div>
+                <div id="soundsList"></div>
+            </div>
+
+            <!-- <div>
+                <h3>Bluetooth Device Control</h3>
+                <button onclick="scanBluetooth()">Scan for Device</button>
+                <button onclick="connectBluetooth()">Connect to Device</button>
+                <p id="bluetooth-status">Status: Not connected</p>
+            </div> -->
+
+        </div>
+
+        <div id="editForm" class="edit-form">
+            <h3>Edit Schedule</h3>
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label>Day:</label>
+                <select id="editDay">
+                    <option value="Weekdays">Weekdays (Mon - Thu)</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+            </div>
+            <div class="form-group">
+                <label>Time (HH:MM):</label>
+                <input type="time" id="editTime">
+            </div>
+            <div class="form-group">
+                <label>Select Sound:</label>
+                <select id="editSoundSelect" class="sound-select"></select>
+                <button onclick="testSound(document.getElementById('editSoundSelect').value)"
+                    class="test-sound">Test</button>
+            </div>
+            <button onclick="saveEdit()">Save Changes</button>
+            <button onclick="cancelEdit()">Cancel</button>
+        </div>
+
+        <h3>Existing Schedules</h3>
+        <div class="filter-section">
+            <button id="filterWeekdays">Weekdays</button>
+            <button id="filterToday">Today</button>
+            <button id="filterAll">All</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Sound</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleTable"></tbody>
+        </table>
+
+
+        <div class="time-settings">
+            <h3>System Time</h3>
+            <div>
+                <label for="current-time">Current Time:</label>
+                <span id="current-time"></span>
+            </div>
+
+            <div>
+                <label for="set-time">Set New Time (ISO format):</label>
+                <input type="datetime-local" id="set-time" placeholder="Select date and time">
+
+
+                <button onclick="setTime()">Set Time</button>
             </div>
         </div>
 
-<br/>
-<div>
-            <label for="set-time">Set New Time (ISO format):</label>
-            <input type="datetime-local" id="set-time" placeholder="Select date and time">
-
-
-            <button onclick="setTime()">Set Time</button>
-        </div>
-
-
         <script>
-
-
-            function toggleAccordion(header) {
-                const item = header.parentElement;
-                item.classList.toggle("active");
-            }
-
-            function openModal() {
-                document.getElementById("editModal").classList.add("active");
-            }
-
-            function closeModal() {
-                document.getElementById("editModal").classList.remove("active");
-            }
-
-            // function editSchedule(id) {
-            //     openModal();
-            //     document.getElementById("editId").value = id;
-            // }
 
 
 
@@ -449,13 +412,6 @@
             }
 
             function editSchedule(id, day, time, sound) {
-                openModal();
-
-                document.getElementById('editId').value = id;
-                document.getElementById('editDay').value = day;
-                document.getElementById('editTime').value = time;
-                document.getElementById('editSoundSelect').value = sound;
-
                 document.getElementById('editForm').classList.add('active');
                 document.getElementById('editId').value = id;
                 document.getElementById('editDay').value = day;
@@ -486,7 +442,6 @@
                     body: JSON.stringify({ day, time, soundPath })
                 });
 
-                closeModal();
                 cancelEdit();
                 fetchSchedules();
             }
@@ -527,7 +482,7 @@
 
             setInterval(() => {
                 fetchCurrentTime();
-            }, 10000);
+            }, 4000);
 
 
             document.getElementById('filterWeekdays').addEventListener('click', function () {
@@ -562,7 +517,7 @@
                     const rowDay = row.cells[0].textContent; // Assuming the day is in the first column
                     if (day === 'All') {
                         row.style.display = '';
-                    } else if (day === 'Weekdays' && ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'].includes(rowDay)) {
+                    } else if (day === 'Weekdays' && ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].includes(rowDay)) {
                         row.style.display = '';
                     } else if (day === 'Today' && rowDay === new Date().toLocaleString('en-us', { weekday: 'long' })) {
                         row.style.display = '';
