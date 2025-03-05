@@ -1,101 +1,5 @@
 [
   {
-    "id": 1740034586296,
-    "day": "Weekdays",
-    "time": "09:30",
-    "sound": "/uploads/1740656287394-school-buzer.mp3"
-  },
-  {
-    "id": 1740034606085,
-    "day": "Weekdays",
-    "time": "09:55",
-    "sound": "/uploads/1740655914738-SecondBell.mp3"
-  },
-  {
-    "id": 1740034622329,
-    "day": "Weekdays",
-    "time": "10:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
-  },
-  {
-    "id": 1740033926330,
-    "day": "Weekdays",
-    "time": "10:39",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
-  },
-  {
-    "id": 1740033972277,
-    "day": "Weekdays",
-    "time": "11:20",
-    "sound": "/uploads/1740655914738-SecondBell.mp3"
-  },
-  {
-    "id": 1740033993826,
-    "day": "Weekdays",
-    "time": "11:30",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
-  },
-  {
-    "id": 1740034007684,
-    "day": "Weekdays",
-    "time": "12:10",
-    "sound": "/uploads/1740655924525-ThirdBell.mp3"
-  },
-  {
-    "id": 1740034022679,
-    "day": "Weekdays",
-    "time": "12:50",
-    "sound": "/uploads/1740655914738-SecondBell.mp3"
-  },
-  {
-    "id": 1740034100497,
-    "day": "Weekdays",
-    "time": "13:29",
-    "sound": "/uploads/1740656287394-school-buzer.mp3"
-  },
-  {
-    "id": 1740034117210,
-    "day": "Weekdays",
-    "time": "13:45",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
-  },
-  {
-    "id": 1740034137292,
-    "day": "Weekdays",
-    "time": "14:20",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
-  },
-  {
-    "id": 1740034165862,
-    "day": "Weekdays",
-    "time": "14:55",
-    "sound": "/uploads/1740655914738-SecondBell.mp3"
-  },
-  {
-    "id": 1740034223938,
-    "day": "Weekdays",
-    "time": "15:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
-  },
-  {
-    "id": 1740034539742,
-    "day": "Weekdays",
-    "time": "15:30",
-    "sound": "/uploads/1740655924525-ThirdBell.mp3"
-  },
-  {
-    "id": 1740034562155,
-    "day": "Weekdays",
-    "time": "15:57",
-    "sound": "/uploads/1740655914738-SecondBell.mp3"
-  },
-  {
-    "id": 1740034575945,
-    "day": "Weekdays",
-    "time": "16:00",
-    "sound": "/uploads/1740656287394-school-buzer.mp3"
-  },
-  {
     "id": 1740632433315,
     "day": "Friday",
     "time": "09:00",
@@ -111,13 +15,13 @@
     "id": 1740632477652,
     "day": "Friday",
     "time": "09:30",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740632506600,
     "day": "Friday",
     "time": "10:10",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740632518325,
@@ -129,7 +33,7 @@
     "id": 1740632528872,
     "day": "Friday",
     "time": "11:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740632537880,
@@ -153,7 +57,7 @@
     "id": 1740632630671,
     "day": "Friday",
     "time": "13:45",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740632644967,
@@ -171,7 +75,7 @@
     "id": 1740632717430,
     "day": "Friday",
     "time": "15:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740632729487,
@@ -207,13 +111,13 @@
     "id": 1740034622329,
     "day": "Saturday",
     "time": "10:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740033926330,
     "day": "Saturday",
     "time": "10:39",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740033972277,
@@ -225,7 +129,7 @@
     "id": 1740033993826,
     "day": "Saturday",
     "time": "11:30",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034007684,
@@ -249,13 +153,13 @@
     "id": 1740034117210,
     "day": "Saturday",
     "time": "13:45",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034137292,
     "day": "Saturday",
     "time": "14:20",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034165862,
@@ -267,7 +171,7 @@
     "id": 1740034223938,
     "day": "Saturday",
     "time": "15:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034539742,
@@ -297,13 +201,13 @@
     "id": 1740034622329,
     "day": "Saturday",
     "time": "10:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740033926330,
     "day": "Saturday",
     "time": "10:39",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740033972277,
@@ -315,7 +219,7 @@
     "id": 1740033993826,
     "day": "Saturday",
     "time": "11:30",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034007684,
@@ -339,13 +243,13 @@
     "id": 1740034117210,
     "day": "Saturday",
     "time": "13:45",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034137292,
     "day": "Saturday",
     "time": "14:20",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034165862,
@@ -357,7 +261,7 @@
     "id": 1740034223938,
     "day": "Saturday",
     "time": "15:00",
-    "sound": "/uploads/1740653956909-school-buzer-[AudioTrimmer.com].mp3"
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
   },
   {
     "id": 1740034539742,
@@ -374,6 +278,108 @@
   {
     "id": 1740034575945,
     "day": "Saturday",
+    "time": "16:00",
+    "sound": "/uploads/1740656287394-school-buzer.mp3"
+  },
+  {
+    "id": 1741070598550,
+    "day": "Weekdays",
+    "time": "09:30",
+    "sound": "/uploads/1740656287394-school-buzer.mp3"
+  },
+  {
+    "id": 1741070611876,
+    "day": "Weekdays",
+    "time": "09:55",
+    "sound": "/uploads/1740655914738-SecondBell.mp3"
+  },
+  {
+    "id": 1741070678598,
+    "day": "Weekdays",
+    "time": "10:00",
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
+  },
+  {
+    "id": 1741070692124,
+    "day": "Weekdays",
+    "time": "10:39",
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
+  },
+  {
+    "id": 1741070702594,
+    "day": "Weekdays",
+    "time": "11:20",
+    "sound": "/uploads/1740655914738-SecondBell.mp3"
+  },
+  {
+    "id": 1741067360657,
+    "day": "Weekdays",
+    "time": "11:30",
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
+  },
+  {
+    "id": 1741067371012,
+    "day": "Weekdays",
+    "time": "12:10",
+    "sound": "/uploads/1740655924525-ThirdBell.mp3"
+  },
+  {
+    "id": 1741067397099,
+    "day": "Weekdays",
+    "time": "12:50",
+    "sound": "/uploads/1740655914738-SecondBell.mp3"
+  },
+  {
+    "id": 1741067414197,
+    "day": "Weekdays",
+    "time": "13:29",
+    "sound": "/uploads/1740656287394-school-buzer.mp3"
+  },
+  {
+    "id": 1741067372347,
+    "day": "Weekdays",
+    "time": "13:29",
+    "sound": "/uploads/1740656287394-school-buzer.mp3"
+  },
+  {
+    "id": 1741067381589,
+    "day": "Weekdays",
+    "time": "13:45",
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
+  },
+  {
+    "id": 1741067392276,
+    "day": "Weekdays",
+    "time": "14:20",
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
+  },
+  {
+    "id": 1741067418121,
+    "day": "Weekdays",
+    "time": "14:55",
+    "sound": "/uploads/1740655914738-SecondBell.mp3"
+  },
+  {
+    "id": 1741067432991,
+    "day": "Weekdays",
+    "time": "15:00",
+    "sound": "/uploads/1740653956909-school-buzer-1.mp3"
+  },
+  {
+    "id": 1741067445458,
+    "day": "Weekdays",
+    "time": "15:30",
+    "sound": "/uploads/1740655924525-ThirdBell.mp3"
+  },
+  {
+    "id": 1741067458053,
+    "day": "Weekdays",
+    "time": "15:57",
+    "sound": "/uploads/1740655914738-SecondBell.mp3"
+  },
+  {
+    "id": 1741067464431,
+    "day": "Weekdays",
     "time": "16:00",
     "sound": "/uploads/1740656287394-school-buzer.mp3"
   }

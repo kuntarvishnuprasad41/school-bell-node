@@ -11,8 +11,10 @@ const player = require('play-sound')({ player: 'mpg123' });
 const app = express();
 const PORT = 3000;
 
-// NEW: Added task management
+// Task management
 const cronTasks = new Map();
+// New: Add a separate map for serializable cron job data
+const cronJobsInfo = new Map();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -50,49 +52,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Helper function to play sound
-// function playSound(soundPath) {
-//     const fullPath = path.join(__dirname, 'public', soundPath);
-//     console.log(`Playing sound: ${fullPath}`);
-
-//     player.play(fullPath, (err) => {
-//         if (err) {
-//             console.error('Error playing sound with play-sound:', err);
-//             console.error('play-sound error code:', err.code);  // Log the error code
-//             console.error('play-sound error signal:', err.signal); // Log the signal
-
-//             // Fallback to ffplay
-//             exec(`ffplay -nodisp -autoexit "${fullPath}"`, (error, stdout, stderr) => {
-//                 if (error) {
-//                     console.error('Error playing with ffplay:', error);
-//                     if (stderr) console.error('ffplay stderr:', stderr);
-//                 } else {
-//                     console.log('ffplay output:', stdout);
-//                 }
-//             });
-//         }
-//     });
-// }
-
-// function playSound(soundPath) {
-//     const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
-//     console.log(`Playing sound with ffplay: ${fullPath}`);
-
-//     // Run the ffplay command as the current user (not root)
-//     exec(`sudo -E -u kuvi41 ffplay -nodisp -autoexit  "${fullPath}"`, (error, stdout, stderr) => {
-//         if (error) {
-//             console.error('Error playing with ffplay:', error);
-//         }
-//         if (stderr) {
-//             console.error('ffplay error:', stderr);
-//         }
-//         if (stdout) {
-//             console.log('ffplay output:', stdout);
-//         }
-//     });
-// }
-
-
 function playSound(soundPath) {
     const fullPath = path.join(__dirname, 'public', soundPath);  // Construct the full file path
     console.log(`Playing sound with ffplay: ${fullPath}`);
@@ -110,39 +69,6 @@ function playSound(soundPath) {
         }
     });
 }
-
-// NEW: Separate function to schedule a single bell
-// function scheduleBell(schedule) {
-//     const [hour, minute] = schedule.time.split(':');
-//     const dayMap = {
-//         'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
-//         'Thursday': 4, 'Friday': 5, 'Saturday': 6
-//     };
-
-//     const cronExpression = `${minute} ${hour} * * ${dayMap[schedule.day]}`;
-//     console.log(`Scheduling bell for ${schedule.day} at ${schedule.time} with sound ${schedule.sound}`);
-
-//     try {
-//         // Stop existing task if it exists
-//         if (cronTasks.has(schedule.id)) {
-//             cronTasks.get(schedule.id).stop();
-//             cronTasks.delete(schedule.id);
-//         }
-
-//         // Create and store new task
-//         const task = cron.schedule(cronExpression, () => {
-//             console.log(`Triggering bell for ${schedule.day} at ${schedule.time}`);
-//             playSound(schedule.sound);
-//         });
-
-//         cronTasks.set(schedule.id, task);
-//     } catch (error) {
-//         console.error(`Error scheduling bell for ID ${schedule.id}:`, error);
-//     }
-// }
-
-
-// const cronTasks = new Map(); // Ensuring cronTasks is initialized
 
 function scheduleBell(schedule) {
     const [hour, minute] = schedule.time.split(':');
@@ -162,13 +88,16 @@ function scheduleBell(schedule) {
         cronExpression = `${minute} ${hour} * * ${dayMap[schedule.day]}`;
     }
 
-    console.log(`Scheduling bell for ${schedule.day} at ${schedule.time} with sound ${schedule.sound} CE:${cronExpression}`);
+    console.log(`Scheduling bell for ${schedule.day} at ${schedule.time} with sound ${schedule.sound}`);
 
     try {
         // Stop existing task if it exists
         if (cronTasks.has(schedule.id)) {
             cronTasks.get(schedule.id).stop();
             cronTasks.delete(schedule.id);
+
+            // Also remove from our serializable map
+            cronJobsInfo.delete(schedule.id);
         }
 
         // Create and store new task
@@ -178,19 +107,33 @@ function scheduleBell(schedule) {
         });
 
         cronTasks.set(schedule.id, task);
+        task.start(); // Start the task immediately
+
+        // Store serializable info for the API
+        cronJobsInfo.set(schedule.id, {
+            id: schedule.id,
+            day: schedule.day,
+            time: schedule.time,
+            sound: schedule.sound,
+            cronExpression: cronExpression,
+            status: 'active',
+            createdAt: new Date().toISOString()
+        });
     } catch (error) {
         console.error(`Error scheduling bell for ID ${schedule.id}:`, error);
     }
 }
 
-
-// MODIFIED: Updated scheduleAllBells function
+// Schedule all bells
 const scheduleAllBells = () => {
     // Stop all existing tasks
     for (const [id, task] of cronTasks.entries()) {
         task.stop();
         cronTasks.delete(id);
     }
+
+    // Clear the info map
+    cronJobsInfo.clear();
 
     // Schedule all bells from the loaded data
     const schedules = readData(schedulesFilePath);
@@ -219,7 +162,7 @@ app.post('/upload-sound', upload.single('sound'), (req, res) => {
     res.status(201).json(newSound);
 });
 
-// MODIFIED: Updated schedule creation
+// Schedule creation
 app.post('/schedule', (req, res) => {
     const { day, time, soundPath } = req.body;
     const schedules = readData(schedulesFilePath);
@@ -254,7 +197,7 @@ app.get('/schedules', (req, res) => {
     res.json(enrichedSchedules);
 });
 
-// MODIFIED: Updated schedule deletion
+// Schedule deletion
 app.delete('/schedule/:id', (req, res) => {
     const { id } = req.params;
     const schedules = readData(schedulesFilePath);
@@ -269,6 +212,9 @@ app.delete('/schedule/:id', (req, res) => {
         if (cronTasks.has(parseInt(id))) {
             cronTasks.get(parseInt(id)).stop();
             cronTasks.delete(parseInt(id));
+
+            // Also remove from our info map
+            cronJobsInfo.delete(parseInt(id));
         }
 
         res.status(200).send("Deleted successfully.");
@@ -277,7 +223,7 @@ app.delete('/schedule/:id', (req, res) => {
     }
 });
 
-// MODIFIED: Updated schedule update
+// Schedule update
 app.put('/schedule/:id', (req, res) => {
     const { id } = req.params;
     const { day, time, soundPath } = req.body;
@@ -338,8 +284,6 @@ app.post('/test-sound', (req, res) => {
     res.status(200).send("Playing sound...");
 });
 
-
-
 // API to delete a sound file
 app.delete('/delete-sound/:id', (req, res) => {
     const { id } = req.params;
@@ -373,6 +317,26 @@ app.delete('/delete-sound/:id', (req, res) => {
     }
 });
 
+// FIXED: API to get all cron jobs - now uses the serializable map
+app.get('/api/cron-jobs', (req, res) => {
+    const jobsArray = Array.from(cronJobsInfo.values());
+    res.json({
+        total: jobsArray.length,
+        jobs: jobsArray
+    });
+});
+
+// Add a new endpoint to get details about a specific cron job
+app.get('/api/cron-jobs/:id', (req, res) => {
+    const { id } = req.params;
+    const numericId = parseInt(id);
+
+    if (!cronJobsInfo.has(numericId)) {
+        return res.status(404).json({ error: `Cron job with ID '${id}' not found` });
+    }
+
+    res.json(cronJobsInfo.get(numericId));
+});
 
 // Schedule all existing bells on server start
 scheduleAllBells();
