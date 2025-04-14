@@ -35,7 +35,7 @@ app.post('/set-system-time', (req, res) => {
     }
 
     // Command for Linux/macOS
-    const command = `sudo date --set="${parsedTime.toISOString()}"`;
+    const command = `sudo date --set="${parsedTime.toISOString()}" && sudo hwclock -w`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {

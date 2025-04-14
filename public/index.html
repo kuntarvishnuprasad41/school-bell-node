@@ -308,8 +308,7 @@
                 const soundsList = document.getElementById('soundsList');
                 soundsList.innerHTML = sounds.map(sound => `
                 <div class="sound-item">
-                    
-                    <audio controls>
+                      <audio controls>
                         <source src="${sound.filepath}" type="audio/mp3">
                     </audio>
                     <span>${sound.originalname}</span>
@@ -407,9 +406,6 @@
             <td>${schedule.day}</td>
             <td>${schedule.time}</td>
             <td>
-                <audio controls>
-                    <source src="${schedule.sound}" type="audio/mp3">
-                </audio>
                 <span>${schedule.originalname || 'Unknown'}</span>
             </td>
             <td>
