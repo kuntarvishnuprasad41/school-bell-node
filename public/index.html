@@ -1,123 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>School Bell Scheduler</title>
-        <!DOCTYPE html>
-        <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Bell Scheduler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>School Bell Scheduler</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        padding: 20px;
-                        max-width: 1200px;
-                        margin: 0 auto;
-                    }
+        .system-time {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-bottom: 2px solid #ddd;
+        }
 
-                    .system-time {
-                        text-align: center;
-                        margin-bottom: 20px;
-                        padding: 10px;
-                        border-bottom: 2px solid #ddd;
-                        font-size: 1.2em;
-                    }
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
 
-                    .schedule-form,
-                    .accordion-item {
-                        border: 1px solid #ddd;
-                        padding: 20px;
-                        margin-bottom: 20px;
-                        border-radius: 8px;
-                    }
+        .time-grid>div {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
 
-                    .accordion-header {
-                        cursor: pointer;
-                        padding: 10px;
-                        border: 1px solid #ddd;
-                        border-radius: 5px;
-                        background-color: #f9f9f9;
-                    }
+        .schedule-form,
+        .accordion-item {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
 
-                    .accordion-content {
-                        display: none;
-                        padding: 10px;
-                    }
+        .accordion-header {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
 
-                    .accordion-item.active .accordion-content {
-                        display: block;
-                    }
+        .accordion-content {
+            display: none;
+            padding: 10px;
+        }
 
-                    button {
-                        padding: 5px 10px;
-                        margin-right: 5px;
-                        cursor: pointer;
-                        border: 1px solid #ddd;
-                        border-radius: 5px;
-                        background-color: #f9f9f9;
-                    }
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
 
-                    button:hover {
-                        background-color: #eee;
-                    }
+        button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
 
-                    .modal {
-                        display: none;
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(0, 0, 0, 0.5);
-                        justify-content: center;
-                        align-items: center;
-                    }
+        button:hover {
+            background-color: #eee;
+        }
 
-                    .modal-content {
-                        background-color: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                        max-width: 500px;
-                        width: 90%;
-                    }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
 
-                    .modal.active {
-                        display: flex;
-                    }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
 
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 20px;
-                    }
+        .modal.active {
+            display: flex;
+        }
 
-                    th,
-                    td {
-                        border: 1px solid #ddd;
-                        padding: 10px;
-                        text-align: left;
-                    }
-                </style>
-            </head>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-    <body>
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
 
-        <div class="system-time">
-            <strong>Current Time:</strong> <span id="current-time"></span>
+        .filters {
+            margin-bottom: 15px;
+        }
+
+        .filters button {
+            margin-right: 10px;
+            padding: 8px 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: inline-block;
+            width: 120px;
+        }
+
+        input[type="time"],
+        select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="system-time">
+        <div class="time-grid">
+            <div>
+                <strong>Current Time:</strong> <span id="current-time"></span><br>
+                <strong>Day:</strong> <span id="current-day"></span>
+            </div>
+            <div>
+                <strong>Next Bell:</strong> <span id="next-bell">No upcoming bells</span>
+            </div>
+            <div>
+                <strong>Last Bell:</strong> <span id="last-bell">No recent bells</span>
+            </div>
         </div>
+    </div>
 
-        <h2>School Bell Scheduler</h2>
+    <h2>School Bell Scheduler</h2>
 
-        <div class="schedule-form">
-            <h3>Add New Schedule</h3>
+    <div class="schedule-form">
+        <h3>Add New Schedule</h3>
+        <div class="form-group">
+            <label>Day:</label>
+            <select id="day">
+                <option value="Weekdays">Weekdays (Mon - Thu)</option>
+                <option value="Friday">Friday</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Time (HH:MM):</label>
+            <input type="time" id="time">
+        </div>
+        <div class="form-group">
+            <label>Select Sound:</label>
+            <select id="soundSelect" class="sound-select"></select>
+            <button onclick="testSound(document.getElementById('soundSelect').value)" class="test-sound">Test</button>
+        </div>
+        <button onclick="addSchedule()">Add Schedule</button>
+    </div>
+
+    <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>Sound Library</h3>
+        </div>
+        <div class="accordion-content">
+            <div class="form-group">
+                <label>Upload New Sound (MP3):</label>
+                <input type="file" id="newSound" accept="audio/mp3">
+                <button onclick="uploadSound()">Upload Sound</button>
+            </div>
+            <div id="soundsList"></div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <button onclick="filterSchedules('All')">All</button>
+        <button onclick="filterSchedules('Weekdays')">Weekdays</button>
+        <button onclick="filterSchedules('Today')">Today</button>
+        <button onclick="filterSchedules('Friday')">Friday</button>
+        <button onclick="filterSchedules('Saturday')">Saturday</button>
+    </div>
+
+    <h3>Existing Schedules</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Sound</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="scheduleTable">
+            <!-- Schedules will be populated here -->
+        </tbody>
+    </table>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3>Edit Schedule</h3>
+            <input type="hidden" id="editId">
             <div class="form-group">
                 <label>Day:</label>
-                <select id="day">
+                <select id="editDay">
                     <option value="Weekdays">Weekdays (Mon - Thu)</option>
                     <option value="Friday">Friday</option>
                     <option value="Monday">Monday</option>
@@ -130,495 +237,403 @@
             </div>
             <div class="form-group">
                 <label>Time (HH:MM):</label>
-                <input type="time" id="time">
+                <input type="time" id="editTime">
             </div>
             <div class="form-group">
                 <label>Select Sound:</label>
-                <select id="soundSelect" class="sound-select"></select>
-                <button onclick="testSound(document.getElementById('soundSelect').value)"
+                <select id="editSoundSelect" class="sound-select"></select>
+                <button onclick="testSound(document.getElementById('editSoundSelect').value)"
                     class="test-sound">Test</button>
             </div>
-            <button onclick="addSchedule()">Add Schedule</button>
+            <button onclick="saveEdit()">Save Changes</button>
+            <button onclick="closeModal()">Cancel</button>
         </div>
+    </div>
 
-        <div class="accordion-item">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <h3>Sound Library</h3>
-            </div>
-            <div class="accordion-content">
-                <div class="form-group">
-                    <label>Upload New Sound (MP3):</label>
-                    <input type="file" id="newSound" accept="audio/mp3">
-                    <button onclick="uploadSound()">Upload Sound</button>
-                </div>
-                <div id="soundsList"></div>
-            </div>
-        </div>
+    <div>
+        <label for="set-time">Set New Time (ISO format):</label>
+        <input type="datetime-local" id="set-time" placeholder="Select date and time">
+        <button onclick="setTime()">Set Time</button>
+    </div>
 
-        <h3>Existing Schedules</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Day</th>
-                    <th>Time</th>
-                    <th>Sound</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="scheduleTable">
-                <!-- Schedules will be populated here -->
-            </tbody>
-        </table>
+    <script>
+        // Global variables
+        let globalSchedules = [];
+        const currentURL = window.location.origin.replace(/:\d+$/, ':3500');
+        const currentURL1 = window.location.origin.replace(/:\d+$/, ':3501');
 
-        <!-- Edit Modal -->
-        <div class="modal" id="editModal">
-            <div class="modal-content">
-                <h3>Edit Schedule</h3>
-                <input type="hidden" id="editId">
-                <div class="form-group">
-                    <label>Day:</label>
-                    <select id="editDay">
-                        <option value="Weekdays">Weekdays (Mon - Thu)</option>
-                        <option value="Friday">Friday</option>
-                        <option value="Monday">Monday</option>
-                        <option value="Tuesday">Tuesday</option>
-                        <option value="Wednesday">Wednesday</option>
-                        <option value="Thursday">Thursday</option>
-                        <option value="Saturday">Saturday</option>
-                        <option value="Sunday">Sunday</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Time (HH:MM):</label>
-                    <input type="time" id="editTime">
-                </div>
-                <div class="form-group">
-                    <label>Select Sound:</label>
-                    <select id="editSoundSelect" class="sound-select"></select>
-                    <button onclick="testSound(document.getElementById('editSoundSelect').value)"
-                        class="test-sound">Test</button>
-                </div>
-                <button onclick="saveEdit()">Save Changes</button>
-                <button onclick="closeModal()">Cancel</button>
-            </div>
-        </div>
+        // Helper functions
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            item.classList.toggle("active");
+        }
 
-<br/>
-<div>
-            <label for="set-time">Set New Time (ISO format):</label>
-            <input type="datetime-local" id="set-time" placeholder="Select date and time">
+        function openModal() {
+            document.getElementById("editModal").classList.add("active");
+        }
 
+        function closeModal() {
+            document.getElementById("editModal").classList.remove("active");
+        }
 
-            <button onclick="setTime()">Set Time</button>
-        </div>
-
-
-        <script>
-
-
-            function toggleAccordion(header) {
-                const item = header.parentElement;
-                item.classList.toggle("active");
+        // Time functions
+        async function setTime() {
+            const newTime = document.getElementById('set-time').value;
+            if (!newTime) {
+                alert('Please enter a time.');
+                return;
             }
 
-            function openModal() {
-                document.getElementById("editModal").classList.add("active");
-            }
+            try {
+                const localDate = new Date(newTime);
+                const offsetIST = 0; // IST offset in minutes
+                const adjustedDate = new Date(localDate.getTime() + offsetIST * 60000);
+                const isoStringIST = adjustedDate.toISOString();
 
-            function closeModal() {
-                document.getElementById("editModal").classList.remove("active");
-            }
+                const response = await fetch(`${currentURL}/set-system-time`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ newTime: isoStringIST }),
+                });
 
-            // function editSchedule(id) {
-            //     openModal();
-            //     document.getElementById("editId").value = id;
-            // }
-
-
-
-
-            const currentURL = window.location.origin.replace(/:\d+$/, ':3500');
-            const currentURL1 = window.location.origin.replace(/:\d+$/, ':3501');
-            async function setTime() {
-                const newTime = document.getElementById('set-time').value;
-                if (!newTime) {
-                    alert('Please enter a time.');
-                    return;
+                if (response.ok) {
+                    alert('System time updated successfully!');
+                    fetchCurrentTime();
+                } else {
+                    const error = await response.text();
+                    alert(`Failed to set time: ${error}`);
                 }
-
-                try {
-                    // Convert the selected time (local) to a JavaScript Date object
-                    const localDate = new Date(newTime);
-
-                    // IST is UTC+5:30, so we add 5.5 hours (5.5 * 60 minutes)
-                    const offsetIST = 0; // IST offset in minutes
-                    const adjustedDate = new Date(localDate.getTime() + offsetIST * 60000);
-
-                    // Format it back to ISO 8601 format
-                    const isoStringIST = adjustedDate.toISOString(); // This will be in UTC with 'Z'
-
-                    // Send the adjusted date to the server
-                    const response = await fetch(`${currentURL}/set-system-time`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ newTime: isoStringIST }),
-                    });
-
-                    if (response.ok) {
-                        alert('System time updated successfully!');
-                        fetchCurrentTime(); // Refresh displayed time
-                    } else {
-                        const error = await response.text();
-                        alert(`Failed to set time: ${error}`);
-                    }
-                } catch (error) {
-                    alert(`Error: ${error.message}`);
-                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
             }
+        }
 
-
-            async function fetchCurrentTime() {
+        async function fetchCurrentTime() {
+            try {
                 const response = await fetch(`${currentURL}/current-time`);
                 const data = await response.json();
-                document.getElementById('current-time').textContent = new Date(data.currentTime).toLocaleString();
+                const serverTime = new Date(data.currentTime);
+                
+                document.getElementById('current-time').textContent = serverTime.toLocaleString();
+                
+                const dayName = serverTime.toLocaleDateString('en-US', { weekday: 'long' });
+                document.getElementById('current-day').textContent = dayName;
+                
+                updateBellTimes(serverTime);
+            } catch (error) {
+                console.error('Error fetching time:', error);
             }
+        }
 
+        function updateBellTimes(currentTime) {
+            let nextBell = null;
+            let lastBell = null;
 
+            globalSchedules.forEach(schedule => {
+                const scheduleDate = getNextScheduleDate(schedule, currentTime);
+                const lastScheduleDate = getLastScheduleDate(schedule, currentTime);
 
-            async function fetchSounds() {
-                const response = await fetch('/sounds');
-                const sounds = await response.json();
-                updateSoundSelects(sounds);
-                displaySoundsList(sounds);
+                if (scheduleDate && (!nextBell || scheduleDate < nextBell)) {
+                    nextBell = scheduleDate;
+                }
+
+                if (lastScheduleDate && (!lastBell || lastScheduleDate > lastBell)) {
+                    lastBell = lastScheduleDate;
+                }
+            });
+
+            document.getElementById('next-bell').textContent = nextBell 
+                ? nextBell.toLocaleTimeString() + ' (' + getDayName(nextBell.getDay()) + ')'
+                : 'No upcoming bells';
+                
+            document.getElementById('last-bell').textContent = lastBell 
+                ? lastBell.toLocaleTimeString() + ' (' + getDayName(lastBell.getDay()) + ')'
+                : 'No recent bells';
+        }
+
+        function getNextScheduleDate(schedule, currentTime) {
+            const [hours, minutes] = schedule.time.split(':');
+            const days = getDays(schedule.day);
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(currentTime);
+                date.setDate(date.getDate() + i);
+                date.setHours(hours, minutes, 0, 0);
+                
+                if (days.includes(date.getDay()) && date > currentTime) {
+                    return date;
+                }
             }
+            return null;
+        }
 
-            function updateSoundSelects(sounds) {
-                const selects = ['soundSelect', 'editSoundSelect'];
-                selects.forEach(selectId => {
-                    const select = document.getElementById(selectId);
-                    select.innerHTML = sounds.map(sound =>
-                        `<option value="${sound.filepath}">${sound.originalname}</option>`
-                    ).join('');
-                });
+        function getLastScheduleDate(schedule, currentTime) {
+            const [hours, minutes] = schedule.time.split(':');
+            const days = getDays(schedule.day);
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(currentTime);
+                date.setDate(date.getDate() - i);
+                date.setHours(hours, minutes, 0, 0);
+                
+                if (days.includes(date.getDay()) && date <= currentTime) {
+                    return date;
+                }
             }
+            return null;
+        }
 
-            function displaySoundsList(sounds) {
-                const soundsList = document.getElementById('soundsList');
-                soundsList.innerHTML = sounds.map(sound => `
+        function getDays(day) {
+            switch(day) {
+                case 'Weekdays': return [1,2,3,4]; // Mon-Thu
+                case 'Monday': return [1];
+                case 'Tuesday': return [2];
+                case 'Wednesday': return [3];
+                case 'Thursday': return [4];
+                case 'Friday': return [5];
+                case 'Saturday': return [6];
+                case 'Sunday': return [0];
+                default: return [];
+            }
+        }
+
+        function getDayName(dayIndex) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return days[dayIndex];
+        }
+
+        // Sound functions
+        async function fetchSounds() {
+            const response = await fetch('/sounds');
+            const sounds = await response.json();
+            updateSoundSelects(sounds);
+            displaySoundsList(sounds);
+        }
+
+        function updateSoundSelects(sounds) {
+            const selects = ['soundSelect', 'editSoundSelect'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = sounds.map(sound =>
+                    `<option value="${sound.filepath}">${sound.originalname}</option>`
+                ).join('');
+            });
+        }
+
+        function displaySoundsList(sounds) {
+            const soundsList = document.getElementById('soundsList');
+            soundsList.innerHTML = sounds.map(sound => `
                 <div class="sound-item">
-                      <audio controls>
+                    <audio controls>
                         <source src="${sound.filepath}" type="audio/mp3">
                     </audio>
                     <span>${sound.originalname}</span>
-                     <button onclick="deleteSound('${sound.id}')">Delete</button>
+                    <button onclick="deleteSound('${sound.id}')">Delete</button>
                 </div>
             `).join('');
+        }
+
+        async function deleteSound(soundId) {
+            if (!confirm('Are you sure you want to delete this sound?')) {
+                return;
             }
 
-            async function deleteSound(soundId) {
-                if (!confirm('Are you sure you want to delete this sound?')) {
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/delete-sound/${soundId}`, {
-                        method: 'DELETE',
-                    });
-
-                    if (response.ok) {
-                        alert('Sound deleted successfully!');
-                        fetchSounds(); // Refresh the sound list
-                    } else {
-                        const error = await response.text();
-                        alert(`Failed to delete sound: ${error}`);
-                    }
-                } catch (error) {
-                    alert(`Error: ${error.message}`);
-                }
-            }
-
-
-            async function uploadSound() {
-                const fileInput = document.getElementById('newSound');
-                if (!fileInput.files.length) {
-                    alert('Please select a sound file.');
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('sound', fileInput.files[0]);
-
-                await fetch('/upload-sound', {
-                    method: 'POST',
-                    body: formData
+            try {
+                const response = await fetch(`/delete-sound/${soundId}`, {
+                    method: 'DELETE',
                 });
 
-                fileInput.value = '';
-                fetchSounds();
-            }
-
-            // async function fetchSchedules() {
-            //     const response = await fetch('/schedules');
-            //     const schedules = await response.json();
-            //     const tableBody = document.getElementById('scheduleTable');
-            //     tableBody.innerHTML = '';
-            //     schedules.forEach(schedule => {
-            //         const row = `<tr>
-            //         <td>${schedule.day}</td>
-            //         <td>${schedule.time}</td>
-            //         <td>
-            //             <audio controls>
-            //                 <source src="${schedule.sound}" type="audio/mp3">
-            //             </audio>
-            //             <span>${schedule.originalname || 'Unknown'}</span>
-            //         </td>
-            //         <td>
-            //             <button onclick="editSchedule(${schedule.id}, '${schedule.day}', '${schedule.time}', '${schedule.sound}')">Edit</button>
-            //             <button onclick="deleteSchedule(${schedule.id})">Delete</button>
-            //             <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
-            //         </td>
-            //     </tr>`;
-            //         tableBody.innerHTML += row;
-            //     });
-            // }
-
-            async function fetchSchedules() {
-                const response = await fetch('/schedules');
-                const schedules = await response.json();
-                const tableBody = document.getElementById('scheduleTable');
-                tableBody.innerHTML = '';
-
-                const dayColors = {
-                    'Monday': 'lightblue',
-                    'Tuesday': 'lightgreen',
-                    'Wednesday': 'lightyellow',
-                    'Thursday': 'lightcoral',
-                    'Friday': 'lightpink',
-                    'Saturday': 'lightseagreen',
-                    'Sunday': 'lightgray',
-                    'Weekdays': 'green'
-                };
-
-                schedules.forEach(schedule => {
-                    const row = `<tr style="background-color: ${dayColors[schedule.day] || 'white'};">
-            <td>${schedule.day}</td>
-            <td>${schedule.time}</td>
-            <td>
-                <span>${schedule.originalname || 'Unknown'}</span>
-            </td>
-            <td>
-                <button onclick="editSchedule(${schedule.id}, '${schedule.day}', '${schedule.time}', '${schedule.sound}')">Edit</button>
-                <button onclick="deleteSchedule(${schedule.id})">Delete</button>
-                <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
-            </td>
-        </tr>`;
-                    tableBody.innerHTML += row;
-                });
-            }
-
-
-
-
-
-            async function addSchedule() {
-                const day = document.getElementById('day').value;
-                const time = document.getElementById('time').value;
-                const soundPath = document.getElementById('soundSelect').value;
-
-                if (!day || !time || !soundPath) {
-                    alert('Please fill in all fields.');
-                    return;
-                }
-
-                await fetch('/schedule', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ day, time, soundPath })
-                });
-                // Continuing the script section...
-                document.getElementById('time').value = '';
-                fetchSchedules();
-            }
-
-            function editSchedule(id, day, time, sound) {
-                openModal();
-
-                document.getElementById('editId').value = id;
-                document.getElementById('editDay').value = day;
-                document.getElementById('editTime').value = time;
-                document.getElementById('editSoundSelect').value = sound;
-
-                document.getElementById('editForm').classList.add('active');
-                document.getElementById('editId').value = id;
-                document.getElementById('editDay').value = day;
-                document.getElementById('editTime').value = time;
-                document.getElementById('editSoundSelect').value = sound;
-            }
-
-            function cancelEdit() {
-                document.getElementById('editForm').classList.remove('active');
-            }
-
-            async function saveEdit() {
-                const id = document.getElementById('editId').value;
-                const day = document.getElementById('editDay').value;
-                const time = document.getElementById('editTime').value;
-                const soundPath = document.getElementById('editSoundSelect').value;
-
-                if (!day || !time || !soundPath) {
-                    alert('Please fill in all fields.');
-                    return;
-                }
-
-                await fetch(`/schedule/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ day, time, soundPath })
-                });
-
-                closeModal();
-                cancelEdit();
-                fetchSchedules();
-            }
-
-            async function deleteSchedule(id) {
-                if (confirm('Are you sure you want to delete this schedule?')) {
-                    await fetch(`/schedule/${id}`, { method: 'DELETE' });
-                    fetchSchedules();
-                }
-            }
-
-            async function testSound(soundPath) {
-                try {
-                    const response = await fetch('/test-sound', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ soundPath })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to play sound');
-                    }
-                } catch (error) {
-                    console.error('Error testing sound:', error);
-                    alert('Failed to play sound. Please check the console for details.');
-                }
-            }
-
-            // Initialize page
-            document.addEventListener('DOMContentLoaded', () => {
-                fetchSounds();
-                fetchSchedules();
-                fetchCurrentTime()
-            });
-
-
-            setInterval(() => {
-                fetchCurrentTime();
-            }, 10000);
-
-
-            document.getElementById('filterWeekdays').addEventListener('click', function () {
-                filterSchedules('Weekdays');
-            });
-
-            document.getElementById('filterToday').addEventListener('click', function () {
-                const today = new Date();
-                const todayDay = today.toLocaleString('en-us', { weekday: 'long' });
-                const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
-
-                // Check if today is a weekday (Mon-Thu)
-                if (weekdays.includes(todayDay)) {
-                    // Show today and all weekdays' schedules
-                    filterSchedules('Weekdays');
+                if (response.ok) {
+                    alert('Sound deleted successfully!');
+                    fetchSounds();
                 } else {
-                    // Show only today's schedule if it's not a weekday (e.g., Friday, Saturday, Sunday)
-                    filterSchedules(todayDay);
+                    const error = await response.text();
+                    alert(`Failed to delete sound: ${error}`);
                 }
-            });
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
 
-            document.getElementById('filterAll').addEventListener('click', function () {
-                filterSchedules('All');
-            });
-
-            // Helper function to filter schedules
-            function filterSchedules(day) {
-                const tableBody = document.getElementById('scheduleTable');
-                const rows = tableBody.getElementsByTagName('tr');
-
-                for (let row of rows) {
-                    const rowDay = row.cells[0].textContent; // Assuming the day is in the first column
-                    if (day === 'All') {
-                        row.style.display = '';
-                    } else if (day === 'Weekdays' && ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'].includes(rowDay)) {
-                        row.style.display = '';
-                    } else if (day === 'Today' && rowDay === new Date().toLocaleString('en-us', { weekday: 'long' })) {
-                        row.style.display = '';
-                    } else if (rowDay === day) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                }
+        async function uploadSound() {
+            const fileInput = document.getElementById('newSound');
+            if (!fileInput.files.length) {
+                alert('Please select a sound file.');
+                return;
             }
 
+            const formData = new FormData();
+            formData.append('sound', fileInput.files[0]);
 
+            await fetch('/upload-sound', {
+                method: 'POST',
+                body: formData
+            });
 
-            const logContainer = document.getElementById("logContainer");
+            fileInput.value = '';
+            fetchSounds();
+        }
 
-            // Function to add log messages to UI
-            function addLog(message) {
-                logContainer.innerHTML += `<p>${message}</p>`;
-                logContainer.scrollTop = logContainer.scrollHeight;
+        // Schedule functions
+        async function fetchSchedules() {
+            const response = await fetch('/schedules');
+            const schedules = await response.json();
+            globalSchedules = schedules;
+            const tableBody = document.getElementById('scheduleTable');
+            tableBody.innerHTML = '';
+
+            const dayColors = {
+                'Monday': 'lightblue',
+                'Tuesday': 'lightgreen',
+                'Wednesday': 'lightyellow',
+                'Thursday': 'lightcoral',
+                'Friday': 'lightpink',
+                'Saturday': 'lightseagreen',
+                'Sunday': 'lightgray',
+                'Weekdays': 'green'
+            };
+
+            schedules.forEach(schedule => {
+                const row = `<tr style="background-color: ${dayColors[schedule.day] || 'white'};">
+                    <td>${schedule.day}</td>
+                    <td>${schedule.time}</td>
+                    <td>
+                        <span>${schedule.originalname || 'Unknown'}</span>
+                    </td>
+                    <td>
+                        <button onclick="editSchedule(${schedule.id}, '${schedule.day}', '${schedule.time}', '${schedule.sound}')">Edit</button>
+                        <button onclick="deleteSchedule(${schedule.id})">Delete</button>
+                        <button onclick="testSound('${schedule.sound}')" class="test-sound">Test</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        async function addSchedule() {
+            const day = document.getElementById('day').value;
+            const time = document.getElementById('time').value;
+            const soundPath = document.getElementById('soundSelect').value;
+
+            if (!day || !time || !soundPath) {
+                alert('Please fill in all fields.');
+                return;
             }
 
-            // Start scanning for Bluetooth devices
-            // function scanBluetooth() {
-            //     addLog("Scanning for devices...");
-            //     fetch(`${currentURL1}/scan`)
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             if (data.status === "success") {
-            //                 addLog(`Device found: ${data.mac}`);
-            //                 document.getElementById("bluetooth-status").innerText = `Device Found: ${data.mac}`;
-            //             } else {
-            //                 addLog("No device found.");
-            //             }
-            //         })
-            //         .catch(error => addLog(`Error: ${error.message}`));
-            // }
+            await fetch('/schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ day, time, soundPath })
+            });
+            
+            document.getElementById('time').value = '';
+            fetchSchedules();
+        }
 
-            // // Connect to the found Bluetooth device
-            // function connectBluetooth() {
-            //     addLog("Connecting to device...");
-            //     fetch(`${currentURL1}/connect`)
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             addLog("Connection attempt completed.");
-            //             document.getElementById("bluetooth-status").innerText = "Device Connected!";
-            //         })
-            //         .catch(error => addLog(`Error: ${error.message}`));
-            // }
+        function editSchedule(id, day, time, sound) {
+            openModal();
+            document.getElementById('editId').value = id;
+            document.getElementById('editDay').value = day;
+            document.getElementById('editTime').value = time;
+            document.getElementById('editSoundSelect').value = sound;
+        }
 
-            // // Live logs using Server-Sent Events (SSE)
-            // function startLogStream() {
-            //     const eventSource = new EventSource(`${currentURL1}/logs`);
-            //     eventSource.onmessage = (event) => addLog(event.data);
-            //     eventSource.onerror = () => addLog("Lost connection to logs...");
-            // }
+        async function saveEdit() {
+            const id = document.getElementById('editId').value;
+            const day = document.getElementById('editDay').value;
+            const time = document.getElementById('editTime').value;
+            const soundPath = document.getElementById('editSoundSelect').value;
 
-            // // Start listening to logs when the page loads
-            // startLogStream();
+            if (!day || !time || !soundPath) {
+                alert('Please fill in all fields.');
+                return;
+            }
 
-        </script>
-    </body>
+            await fetch(`/schedule/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ day, time, soundPath })
+            });
+
+            closeModal();
+            fetchSchedules();
+        }
+
+        async function deleteSchedule(id) {
+            if (confirm('Are you sure you want to delete this schedule?')) {
+                await fetch(`/schedule/${id}`, { method: 'DELETE' });
+                fetchSchedules();
+            }
+        }
+
+        async function testSound(soundPath) {
+            try {
+                const response = await fetch('/test-sound', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ soundPath })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to play sound');
+                }
+            } catch (error) {
+                console.error('Error testing sound:', error);
+                alert('Failed to play sound. Please check the console for details.');
+            }
+        }
+
+        // Filter function
+        function filterSchedules(filter) {
+            const rows = document.querySelectorAll('#scheduleTable tr');
+            const currentDay = document.getElementById('current-day').textContent;
+            
+            rows.forEach(row => {
+                const dayCell = row.cells[0].textContent;
+                let shouldShow = false;
+                
+                switch(filter) {
+                    case 'All':
+                        shouldShow = true;
+                        break;
+                    case 'Weekdays':
+                        shouldShow = ['Weekdays','Monday','Tuesday','Wednesday','Thursday'].includes(dayCell);
+                        break;
+                    case 'Today':
+                        if (['Monday','Tuesday','Wednesday','Thursday'].includes(currentDay)) {
+                            shouldShow = dayCell === 'Weekdays' || dayCell === currentDay;
+                        } else {
+                            shouldShow = dayCell === currentDay;
+                        }
+                        break;
+                    default:
+                        shouldShow = dayCell === filter;
+                }
+                
+                row.style.display = shouldShow ? '' : 'none';
+            });
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchSounds();
+            fetchSchedules();
+            fetchCurrentTime();
+        });
+
+        // Update time every 10 seconds
+        setInterval(() => {
+            fetchCurrentTime();
+        }, 10000);
+    </script>
+</body>
 
 </html>
