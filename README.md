@@ -1,6 +1,6 @@
-PIN DIAGRAM 
+# PIN DIAGRAM 
 
-CJMCU-1334 ->Pi Zero
+## CJMCU-1334 ->Pi Zero
 VIN - 5V
 GND - GND
 DIN - 40 (GPIO21)
@@ -11,7 +11,7 @@ AGND- GND 6
 
 
 
-DS3231 RTC  - Pi Zero
+## DS3231 RTC  - Pi Zero
 VCC - 5V
 GND - GND
 SDA - GPIO2 (PIN 3)
