@@ -9,3 +9,11 @@ BCLK- 12 (GPIO 18)
 AGND- GND 6
 
 
+
+
+DS3231 RTC  - Pi Zero
+VCC - 5V
+GND - GND
+SDA - GPIO2 (PIN 3)
+SCL - GPIO3 (PIN 5)
+
