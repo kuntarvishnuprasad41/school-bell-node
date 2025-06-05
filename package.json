@@ -23,7 +23,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
-    "multer": "^2.0.0",
+    "multer": "^2.0.1",
     "node-cron": "^3.0.3",
     "nodemon": "^3.1.10",
     "path": "^0.12.7",
